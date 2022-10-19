@@ -1,7 +1,7 @@
 <?php
 if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
-class Disciple_Tools_Plugin_Starter_Template_Endpoints
+class Disciple_Tools_Survey_Collection_Endpoints
 {
     /**
      * @todo Set the permissions your endpoint needs
@@ -19,13 +19,13 @@ class Disciple_Tools_Plugin_Starter_Template_Endpoints
      */
     //See https://github.com/DiscipleTools/disciple-tools-theme/wiki/Site-to-Site-Link for outside of wordpress authentication
     public function add_api_routes() {
-        $namespace = 'disciple-tools-plugin-starter-template/v1';
+        $namespace = 'disciple-tools-survey-collection/v1';
 
         register_rest_route(
-            $namespace, '/endpoint', [
-                'methods'  => 'GET',
-                'callback' => [ $this, 'endpoint' ],
-                'permission_callback' => function( WP_REST_Request $request ) {
+            $namespace, '/stats', [
+                'methods'             => 'GET',
+                'callback'            => [ $this, 'stats' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
                     return $this->has_permission();
                 },
             ]
@@ -33,11 +33,33 @@ class Disciple_Tools_Plugin_Starter_Template_Endpoints
     }
 
 
-    public function endpoint( WP_REST_Request $request ) {
+    public function stats( WP_REST_Request $request ) {
 
-        // @todo run your function here
+        // Calculate statistics for reports post type.
+        $stats = apply_filters( 'dt_after_get_post_fields_filter', [], 'reports' );
 
-        return true;
+        // Package any generated statistics.
+        $response = [];
+        if ( isset( $stats['new_baptisms_all_time'], $stats['new_groups_all_time'], $stats['active_groups_all_time'], $stats['shares_all_time'], $stats['prayers_all_time'], $stats['invites_all_time'] ) ) {
+            $field_settings = DT_Posts::get_post_field_settings( 'reports', false );
+            $fields         = [
+                'new_baptisms_all_time',
+                'new_groups_all_time',
+                'active_groups_all_time',
+                'shares_all_time',
+                'prayers_all_time',
+                'invites_all_time'
+            ];
+
+            foreach ( $fields as $field ) {
+                $response[] = [
+                    'label' => $field_settings[ $field ]['name'] ?? $field,
+                    'value' => $stats[ $field ]
+                ];
+            }
+        }
+
+        return $response;
     }
 
     private static $_instance = null;
@@ -60,4 +82,4 @@ class Disciple_Tools_Plugin_Starter_Template_Endpoints
         return $pass;
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Endpoints::instance();
+Disciple_Tools_Survey_Collection_Endpoints::instance();

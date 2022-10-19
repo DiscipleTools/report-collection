@@ -2,22 +2,22 @@
 if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
 /**
- * Class Disciple_Tools_Plugin_Starter_Template_Base
+ * Class Disciple_Tools_Survey_Collection_Base
  * Load the core post type hooks into the Disciple.Tools system
  */
-class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
+class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     /**
      * Define post type variables
      * @todo update these variables with your post_type, module key, and names.
      * @var string
      */
-    public $post_type = 'starter_post_type';
-    public $module = 'starter_base';
-    public $single_name = 'Starter';
-    public $plural_name = 'Starters';
+    public $post_type = 'reports';
+    public $module = 'reports_base';
+    public $single_name = 'Report';
+    public $plural_name = 'Reports';
     public static function post_type(){
-        return 'starter_post_type';
+        return 'reports';
     }
 
     private static $_instance = null;
@@ -50,6 +50,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
         add_action( 'post_connection_added', [ $this, 'post_connection_added' ], 10, 4 );
         add_filter( 'dt_post_update_fields', [ $this, 'dt_post_update_fields' ], 10, 3 );
         add_filter( 'dt_post_create_fields', [ $this, 'dt_post_create_fields' ], 10, 2 );
+        add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
         add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 10, 3 );
         add_action( 'dt_comment_created', [ $this, 'dt_comment_created' ], 10, 4 );
 
@@ -59,16 +60,29 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
 
     }
 
-    public function after_setup_theme(){
-        $this->single_name = __( 'Starter', 'disciple-tools-plugin-starter-template' );
-        $this->plural_name = __( 'Starters', 'disciple-tools-plugin-starter-template' );
+    public function after_setup_theme() {
+        $this->single_name = __( 'Report', 'disciple-tools-survey-collection' );
+        $this->plural_name = __( 'Reports', 'disciple-tools-survey-collection' );
 
         if ( class_exists( 'Disciple_Tools_Post_Type_Template' ) ) {
             new Disciple_Tools_Post_Type_Template( $this->post_type, $this->single_name, $this->plural_name );
         }
+
+        if ( class_exists( 'Disciple_Tools_Survey_Collection_Dashboard_Tile' ) ) {
+            DT_Dashboard_Plugin_Tiles::instance()->register(
+                new Disciple_Tools_Survey_Collection_Dashboard_Tile(
+                    'dt_survey_collection_dashboard_tile',
+                    __( 'Survey Collection Statistics', 'disciple-tools-survey-collection' ),
+                    [
+                        'priority' => 1,
+                        'span'     => 2
+                    ]
+                )
+            );
+        }
     }
 
-      /**
+    /**
      * Set the singular and plural translations for this post types settings
      * The add_filter is set onto a higher priority than the one in Disciple_tools_Post_Type_Template
      * so as to enable localisation changes. Otherwise the system translation passed in to the custom post type
@@ -76,8 +90,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
      */
     public function dt_get_post_type_settings( $settings, $post_type ){
         if ( $post_type === $this->post_type ){
-            $settings['label_singular'] = __( 'Starter', 'disciple-tools-plugin-starter-template' );
-            $settings['label_plural'] = __( 'Starters', 'disciple-tools-plugin-starter-template' );
+            $settings['label_singular'] = __( 'Report', 'disciple-tools-survey-collection' );
+            $settings['label_plural'] = __( 'Reports', 'disciple-tools-survey-collection' );
         }
         return $settings;
     }
@@ -92,7 +106,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
         if ( !isset( $expected_roles['multiplier'] ) ){
             $expected_roles['multiplier'] = [
 
-                'label' => __( 'Multiplier', 'disciple-tools-plugin-starter-template' ),
+                'label' => __( 'Multiplier', 'disciple-tools-survey-collection' ),
                 'description' => 'Interacts with Contacts and Groups',
                 'permissions' => []
             ];
@@ -127,25 +141,23 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
     public function dt_custom_fields_settings( $fields, $post_type ){
         if ( $post_type === $this->post_type ){
 
-
-
             /**
              * @todo configure status appropriate to your post type
              * @todo modify strings and add elements to default array
              */
             $fields['status'] = [
-                'name'        => __( 'Status', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Set the current status.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Status', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Set the current status.', 'disciple-tools-survey-collection' ),
                 'type'        => 'key_select',
                 'default'     => [
                     'inactive' => [
-                        'label' => __( 'Inactive', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'No longer active.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Inactive', 'disciple-tools-survey-collection' ),
+                        'description' => __( 'No longer active.', 'disciple-tools-survey-collection' ),
                         'color' => '#F43636'
                     ],
                     'active'   => [
-                        'label' => __( 'Active', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Is active.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Active', 'disciple-tools-survey-collection' ),
+                        'description' => __( 'Is active.', 'disciple-tools-survey-collection' ),
                         'color' => '#4CAF50'
                     ],
                 ],
@@ -155,8 +167,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'show_in_table' => 10,
             ];
             $fields['assigned_to'] = [
-                'name'        => __( 'Assigned To', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Select the main person who is responsible for reporting on this record.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Assigned To', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Select the main person who is responsible for reporting on this record.', 'disciple-tools-survey-collection' ),
                 'type'        => 'user_select',
                 'default'     => '',
                 'tile' => 'status',
@@ -164,13 +176,11 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'show_in_table' => 16,
             ];
 
-
-
             /**
              * Common and recommended fields
-             */
+             *
             $fields['start_date'] = [
-                'name'        => __( 'Start Date', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Start Date', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type'        => 'date',
                 'default'     => time(),
@@ -178,7 +188,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/date-start.svg',
             ];
             $fields['end_date'] = [
-                'name'        => __( 'End Date', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'End Date', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type'        => 'date',
                 'default'     => '',
@@ -186,21 +196,21 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/date-end.svg',
             ];
             $fields['multi_select'] = [
-                'name' => __( 'Multi-Select', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Multi Select Field', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Multi-Select', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Multi Select Field', 'disciple-tools-survey-collection' ),
                 'type' => 'multi_select',
                 'default' => [
                     'item_1' => [
-                        'label' => __( 'Item 1', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 1.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 1', 'disciple-tools-survey-collection' ),
+                        'description' => __( 'Item 1.', 'disciple-tools-survey-collection' ),
                     ],
                     'item_2' => [
-                        'label' => __( 'Item 2', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 2.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 2', 'disciple-tools-survey-collection' ),
+                        'description' => __( 'Item 2.', 'disciple-tools-survey-collection' ),
                     ],
                     'item_3' => [
-                        'label' => __( 'Item 3', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 3.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 3', 'disciple-tools-survey-collection' ),
+                        'description' => __( 'Item 3.', 'disciple-tools-survey-collection' ),
                     ],
                 ],
                 'tile' => 'details',
@@ -212,10 +222,10 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             /**
              * @todo this section adds location support to this post type. remove if not needed.
              * location elements
-             */
+             *
             $fields['location_grid'] = [
-                'name'        => __( 'Locations', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'The general location where this contact is located.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Locations', 'disciple-tools-survey-collection' ),
+                'description' => __( 'The general location where this contact is located.', 'disciple-tools-survey-collection' ),
                 'type'        => 'location',
                 'mapbox'    => false,
                 'in_create_form' => true,
@@ -223,8 +233,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/location.svg',
             ];
             $fields['location_grid_meta'] = [
-                'name'        => __( 'Locations', 'disciple-tools-plugin-starter-template' ), //system string does not need translation
-                'description' => __( 'The general location where this record is located.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Locations', 'disciple-tools-survey-collection' ), //system string does not need translation
+                'description' => __( 'The general location where this record is located.', 'disciple-tools-survey-collection' ),
                 'type'        => 'location_meta',
                 'tile'      => 'details',
                 'mapbox'    => false,
@@ -232,7 +242,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/location.svg?v=2',
             ];
             $fields['contact_address'] = [
-                'name' => __( 'Address', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Address', 'disciple-tools-survey-collection' ),
                 'icon' => get_template_directory_uri() . '/dt-assets/images/house.svg',
                 'type' => 'communication_channel',
                 'tile' => 'details',
@@ -253,9 +263,9 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             /**
              * @todo this adds generational support to this post type. remove if not needed.
              * generation and peer connection fields
-             */
+             *
             $fields['parents'] = [
-                'name' => __( 'Parents', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Parents', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -266,7 +276,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'create-icon' => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
             ];
             $fields['peers'] = [
-                'name' => __( 'Peers', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Peers', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -277,7 +287,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'create-icon' => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
             ];
             $fields['children'] = [
-                'name' => __( 'Children', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Children', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -292,10 +302,10 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             /**
              * @todo this adds people groups support to this post type. remove if not needed.
              * Connections to other post types
-             */
+             *
             $fields['peoplegroups'] = [
-                'name' => __( 'People Groups', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'The people groups connected to this record.', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'People Groups', 'disciple-tools-survey-collection' ),
+                'description' => __( 'The people groups connected to this record.', 'disciple-tools-survey-collection' ),
                 'type' => 'connection',
                 'tile' => 'details',
                 'post_type' => 'peoplegroups',
@@ -305,7 +315,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             ];
 
             $fields['contacts'] = [
-                'name' => __( 'Contacts', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Contacts', 'disciple-tools-survey-collection' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => 'contacts',
@@ -316,11 +326,172 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'create-icon' => get_template_directory_uri() . '/dt-assets/images/add-contact.svg',
                 'show_in_table' => 35
             ];
+             */
+
+            $fields['submit_date']   = [
+                'name'        => __( 'Submission Date', 'disciple-tools-survey-collection' ),
+                'description' => '',
+                'type'        => 'date',
+                'default'     => '',
+                'tile'        => 'details',
+                'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
+            ];
+            $fields['shares']        = [
+                'name'          => __( 'Shares', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/share.svg',
+                'show_in_table' => 11
+            ];
+            $fields['prayers']       = [
+                'name'          => __( 'Prayers', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/bible.svg',
+                'show_in_table' => 12
+            ];
+            $fields['invites']       = [
+                'name'          => __( 'Invites', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/chat.svg',
+                'show_in_table' => 13
+            ];
+            $fields['new_baptisms']  = [
+                'name'          => __( 'New Baptisms', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/baptism.svg',
+                'show_in_table' => 14
+            ];
+            $fields['new_groups']    = [
+                'name'          => __( 'New Groups', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
+                'show_in_table' => 15
+            ];
+            $fields['active_groups'] = [
+                'name'          => __( 'Active Groups', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg',
+                'show_in_table' => 16
+            ];
+            // Statistics fields
+            $fields['new_baptisms_ytd']       = [
+                'name'          => __( 'New Baptisms [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/baptism.svg'
+            ];
+            $fields['new_groups_ytd']         = [
+                'name'          => __( 'New Groups [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/add-group.svg'
+            ];
+            $fields['active_groups_ytd']      = [
+                'name'          => __( 'Active Groups [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg'
+            ];
+            $fields['shares_ytd']             = [
+                'name'          => __( 'Shares [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/share.svg'
+            ];
+            $fields['prayers_ytd']            = [
+                'name'          => __( 'Prayers [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/bible.svg'
+            ];
+            $fields['invites_ytd']            = [
+                'name'          => __( 'Invites [YTD]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/chat.svg'
+            ];
+            $fields['new_baptisms_all_time']  = [
+                'name'          => __( 'New Baptisms [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/baptism.svg'
+            ];
+            $fields['new_groups_all_time']    = [
+                'name'          => __( 'New Groups [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/add-group.svg'
+            ];
+            $fields['active_groups_all_time'] = [
+                'name'          => __( 'Active Groups [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg'
+            ];
+            $fields['shares_all_time']        = [
+                'name'          => __( 'Shares [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/share.svg'
+            ];
+            $fields['prayers_all_time']       = [
+                'name'          => __( 'Prayers [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/bible.svg'
+            ];
+            $fields['invites_all_time']       = [
+                'name'          => __( 'Invites [All Time]', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'statistics',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/chat.svg'
+            ];
         }
 
         /**
          * @todo this adds connection to contacts. remove if not needed.
-         */
+         *
         if ( $post_type === 'contacts' ){
             $fields[$this->post_type] = [
                 'name' => $this->plural_name,
@@ -338,7 +509,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
 
         /**
          * @todo this adds connection to groups. remove if not needed.
-         */
+         *
         if ( $post_type === 'groups' ){
             $fields[$this->post_type] = [
                 'name' => $this->plural_name,
@@ -353,6 +524,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'show_in_table' => 35
             ];
         }
+         */
+
         return $fields;
     }
 
@@ -360,11 +533,12 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
      * @todo define tiles
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/field-and-tiles.md
      */
-    public function dt_details_additional_tiles( $tiles, $post_type = '' ){
-        if ( $post_type === $this->post_type ){
-            $tiles['connections'] = [ 'label' => __( 'Connections', 'disciple-tools-plugin-starter-template' ) ];
-            $tiles['other'] = [ 'label' => __( 'Other', 'disciple-tools-plugin-starter-template' ) ];
+    public function dt_details_additional_tiles( $tiles, $post_type = '' ) {
+        if ( $post_type === $this->post_type ) {
+            $tiles['tracking']   = [ 'label' => __( 'Tracking', 'disciple-tools-survey-collection' ) ];
+            $tiles['statistics'] = [ 'label' => __( 'Statistics', 'disciple-tools-survey-collection' ) ];
         }
+
         return $tiles;
     }
 
@@ -380,7 +554,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             $post = DT_Posts::get_post( $this->post_type, get_the_ID() );
             ?>
             <div class="section-subheader">
-                <?php esc_html_e( 'Custom Section Contact', 'disciple-tools-plugin-starter-template' ) ?>
+                <?php esc_html_e( 'Custom Section Contact', 'disciple-tools-survey-collection' ) ?>
             </div>
             <div>
                 <p>Add information or custom fields here</p>
@@ -418,15 +592,6 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
 //        }
     }
 
-    //filter at the start of post update
-    public function dt_post_update_fields( $fields, $post_type, $post_id ){
-//        if ( $post_type === $this->post_type ){
-//            // execute your code here
-//        }
-        return $fields;
-    }
-
-
     //filter when a comment is created
     public function dt_comment_created( $post_type, $post_id, $comment_id, $type ){
     }
@@ -442,11 +607,103 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
         return $fields;
     }
 
+    //filter at the start of post update
+    public function dt_post_update_fields( $fields, $post_type, $post_id ) {
+        if ( $post_type === $this->post_type ) {
+            // execute your code here
+        }
+
+        return $fields;
+    }
+
+    //filter following get post requests
+    public function dt_after_get_post_fields_filter( $fields, $post_type ) {
+        if ( $post_type === $this->post_type ) {
+
+            // Calculate collective report record statistics.
+            $statistics = self::calculate_statistics( $fields, $post_type );
+
+            // Accordingly update corresponding statistics fields.
+            if ( isset( $statistics['ytd'] ) ) {
+                $fields['new_baptisms_ytd']  = $statistics['ytd']['new_baptisms'];
+                $fields['new_groups_ytd']    = $statistics['ytd']['new_groups'];
+                $fields['active_groups_ytd'] = $statistics['ytd']['active_groups'];
+                $fields['shares_ytd']        = $statistics['ytd']['shares'];
+                $fields['prayers_ytd']       = $statistics['ytd']['prayers'];
+                $fields['invites_ytd']       = $statistics['ytd']['invites'];
+            }
+            if ( isset( $statistics['all_time'] ) ) {
+                $fields['new_baptisms_all_time']  = $statistics['all_time']['new_baptisms'];
+                $fields['new_groups_all_time']    = $statistics['all_time']['new_groups'];
+                $fields['active_groups_all_time'] = $statistics['all_time']['active_groups'];
+                $fields['shares_all_time']        = $statistics['all_time']['shares'];
+                $fields['prayers_all_time']       = $statistics['all_time']['prayers'];
+                $fields['invites_all_time']       = $statistics['all_time']['invites'];
+            }
+        }
+
+        return $fields;
+    }
+
+    private function calculate_statistics( $fields, $post_type ) {
+        global $wpdb;
+        $current_user_id = get_current_user_id();
+        $statistics      = [];
+
+        // Calculate year-to-date (ytd) statistics.
+        if ( ! empty( $fields['submit_date'] ) ) {
+            $ytd_results = $wpdb->get_results( self::calculate_statistics_prepare_sql( $wpdb, $current_user_id, $fields['submit_date']['timestamp'], time(), $post_type ), ARRAY_A );
+
+            // Capture ytd result stats.
+            if ( ! empty( $ytd_results ) ) {
+                $statistics['ytd'] = [
+                    'new_baptisms'  => $ytd_results[0]['new_baptisms'],
+                    'new_groups'    => $ytd_results[0]['new_groups'],
+                    'active_groups' => $ytd_results[0]['active_groups'],
+                    'shares'        => $ytd_results[0]['shares'],
+                    'prayers'       => $ytd_results[0]['prayers'],
+                    'invites'       => $ytd_results[0]['invites']
+                ];
+            }
+        }
+
+        // Calculate all-time statistics.
+        $all_time_results = $wpdb->get_results( self::calculate_statistics_prepare_sql( $wpdb, $current_user_id, 0, time(), $post_type ), ARRAY_A );
+
+        // Capture all time result stats.
+        if ( ! empty( $all_time_results ) ) {
+            $statistics['all_time'] = [
+                'new_baptisms'  => $all_time_results[0]['new_baptisms'],
+                'new_groups'    => $all_time_results[0]['new_groups'],
+                'active_groups' => $all_time_results[0]['active_groups'],
+                'shares'        => $all_time_results[0]['shares'],
+                'prayers'       => $all_time_results[0]['prayers'],
+                'invites'       => $all_time_results[0]['invites']
+            ];
+        }
+
+        return $statistics;
+    }
+
+    private function calculate_statistics_prepare_sql( $wpdb, $user_id, $start_ts, $end_ts, $post_type ) {
+        return $wpdb->prepare( "
+            SELECT SUM(pm_baptisms.meta_value) new_baptisms, SUM(pm_new_groups.meta_value) new_groups, SUM(pm_groups.meta_value) active_groups, SUM(pm_shares.meta_value) shares, SUM(pm_prayers.meta_value) prayers, SUM(pm_invites.meta_value) invites
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to' AND pm.meta_value = CONCAT( 'user-', %s ))
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            INNER JOIN $wpdb->postmeta pm_baptisms ON (p.ID = pm_baptisms.post_id) AND (pm_baptisms.meta_key = 'new_baptisms')
+            INNER JOIN $wpdb->postmeta pm_new_groups ON (p.ID = pm_new_groups.post_id) AND (pm_new_groups.meta_key = 'new_groups')
+            INNER JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
+            INNER JOIN $wpdb->postmeta pm_shares ON (p.ID = pm_shares.post_id) AND (pm_shares.meta_key = 'shares')
+            INNER JOIN $wpdb->postmeta pm_prayers ON (p.ID = pm_prayers.post_id) AND (pm_prayers.meta_key = 'prayers')
+            INNER JOIN $wpdb->postmeta pm_invites ON (p.ID = pm_invites.post_id) AND (pm_invites.meta_key = 'invites')
+            WHERE p.post_type = %s
+            ", $user_id, $start_ts, $end_ts, $post_type );
+    }
+
     //action when a post has been created
     public function dt_post_created( $post_type, $post_id, $initial_fields ){
     }
-
-    //list page filters function
 
     /**
      * @todo adjust queries to support list counts
@@ -536,7 +793,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
 
             $filters['tabs'][] = [
                 'key' => 'assigned_to_me',
-                'label' => __( 'Assigned to me', 'disciple-tools-plugin-starter-template' ),
+                'label' => __( 'Assigned to me', 'disciple-tools-survey-collection' ),
                 'count' => $total_my,
                 'order' => 20
             ];
@@ -544,7 +801,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             $filters['filters'][] = [
                 'ID' => 'my_all',
                 'tab' => 'assigned_to_me',
-                'name' => __( 'All', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'All', 'disciple-tools-survey-collection' ),
                 'query' => [
                     'assigned_to' => [ 'me' ],
                     'sort' => 'status'
@@ -601,7 +858,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 }
                 $filters['tabs'][] = [
                     'key' => 'all',
-                    'label' => __( 'All', 'disciple-tools-plugin-starter-template' ),
+                    'label' => __( 'All', 'disciple-tools-survey-collection' ),
                     'count' => $total_all,
                     'order' => 10
                 ];
@@ -609,7 +866,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 $filters['filters'][] = [
                     'ID' => 'all',
                     'tab' => 'all',
-                    'name' => __( 'All', 'disciple-tools-plugin-starter-template' ),
+                    'name' => __( 'All', 'disciple-tools-survey-collection' ),
                     'query' => [
                         'sort' => '-post_date'
                     ],

@@ -6,10 +6,10 @@ if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
  * @todo also rename in charts-loader.php
  */
 
-class Disciple_Tools_Plugin_Starter_Template_Chart_Template extends DT_Metrics_Chart_Base
+class Disciple_Tools_Survey_Collection_Chart_Template extends DT_Metrics_Chart_Base
 {
-    public $base_slug = 'disciple-tools-plugin-starter-template-metrics'; // lowercase
-    public $base_title = 'Plugin Starter Template Metrics';
+    public $base_slug = 'disciple-tools-survey-collection-metrics'; // lowercase
+    public $base_title = 'Survey Collection Metrics';
 
     public $title = 'Template';
     public $slug = 'template'; // lowercase
@@ -65,7 +65,7 @@ class Disciple_Tools_Plugin_Starter_Template_Chart_Template extends DT_Metrics_C
                 ],
                 'translations' => [
                     'title' => $this->title,
-                    'Sample API Call' => __( 'Sample API Call', 'disciple-tools-plugin-starter-template' )
+                    'Sample API Call' => __( 'Sample API Call', 'disciple-tools-survey-collection' )
                 ]
             ]
         );
