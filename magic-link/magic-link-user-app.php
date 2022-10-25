@@ -14,7 +14,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     public $post_type = 'user';
     private $meta_key = '';
     public $show_bulk_send = false;
-    public $show_app_tile = false;
+    public $show_app_tile = true; // show this magic link in the Apps tile on the post record
 
     private static $_instance = null;
     public $meta = []; // Allows for instance specific data.
@@ -163,7 +163,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             'url_base'         => $this->root . '/' . $this->type,
             'label'            => $this->page_title,
             'description'      => $this->page_description,
-            'settings_display' => false
+            'settings_display' => true
         ];
 
         return $apps_list;

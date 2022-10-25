@@ -13,8 +13,8 @@ class Disciple_Tools_Survey_Collection_Charts
 
     public function __construct(){
 
-        require_once( 'one-page-chart-template.php' );
-        new Disciple_Tools_Survey_Collection_Chart_Template();
+        require_once( 'report-statistics.php' );
+        new Disciple_Tools_Survey_Collection_Report_Statistics();
 
         /**
          * @todo add other charts like the pattern above here
