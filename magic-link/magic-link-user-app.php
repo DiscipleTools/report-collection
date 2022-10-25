@@ -1030,12 +1030,12 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                         <tbody style="border: none;">
                         <tr style="border: none;">
                             <td>
-                                <h3><?php esc_html_e( "Reports", 'disciple-tools-survey-collection' ) ?> [ <span
+                                <h3><?php esc_html_e( 'Reports', 'disciple-tools-survey-collection' ) ?> [ <span
                                         id="total">0</span> ]</h3>
                             </td>
                             <td style="text-align: right;">
                                 <button id="new_report_but"
-                                        class="button select-button"><?php esc_html_e( "New Report", 'disciple-tools-survey-collection' ) ?></button>
+                                        class="button select-button"><?php esc_html_e( 'New Report', 'disciple-tools-survey-collection' ) ?></button>
                             </td>
                         </tr>
                         </tbody>
@@ -1070,7 +1070,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                 <!-- SUBMIT UPDATES -->
                 <button id="content_submit_but" style="display: none; min-width: 100%;" class="button select-button">
-                    <?php esc_html_e( "Submit Update", 'disciple-tools-survey-collection' ) ?>
+                    <?php esc_html_e( 'Submit Update', 'disciple-tools-survey-collection' ) ?>
                 </button>
             </div>
         </div>
@@ -1099,7 +1099,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         register_rest_route(
             $namespace, '/' . $this->type . '/new_post', [
                 [
-                    'methods'             => "GET",
+                    'methods'             => 'GET',
                     'callback'            => [ $this, 'new_post' ],
                     'permission_callback' => function ( WP_REST_Request $request ) {
                         $magic = new DT_Magic_URL( $this->root );
@@ -1112,7 +1112,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         register_rest_route(
             $namespace, '/' . $this->type . '/post', [
                 [
-                    'methods'             => "GET",
+                    'methods'             => 'GET',
                     'callback'            => [ $this, 'get_post' ],
                     'permission_callback' => function ( WP_REST_Request $request ) {
                         $magic = new DT_Magic_URL( $this->root );
@@ -1145,7 +1145,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
         // Sanitize and fetch user id
         $params  = dt_recursive_sanitize_array( $params );
-        $user_id = $params["parts"]["post_id"];
+        $user_id = $params['parts']['post_id'];
 
         // Fetch all assigned posts
         $data = [];
@@ -1194,7 +1194,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     public function new_post( WP_REST_Request $request ) {
         $params = $request->get_params();
         if ( ! isset( $params['parts'], $params['action'], $params['link_obj_id'] ) ) {
-            return new WP_Error( __METHOD__, "Missing parameters", [ 'status' => 400 ] );
+            return new WP_Error( __METHOD__, 'Missing parameters', [ 'status' => 400 ] );
         }
 
         // Capture fields to be returned, with name field topping the list.
@@ -1233,12 +1233,12 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     public function get_post( WP_REST_Request $request ) {
         $params = $request->get_params();
         if ( ! isset( $params['post_id'], $params['parts'], $params['action'], $params['link_obj_id'] ) ) {
-            return new WP_Error( __METHOD__, "Missing parameters", [ 'status' => 400 ] );
+            return new WP_Error( __METHOD__, 'Missing parameters', [ 'status' => 400 ] );
         }
 
         // Sanitize and fetch user id.
         $params  = dt_recursive_sanitize_array( $params );
-        $user_id = $params["parts"]["post_id"];
+        $user_id = $params['parts']['post_id'];
 
         // Update logged-in user state as required.
         $original_user = wp_get_current_user();
@@ -1303,7 +1303,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     public function update_record( WP_REST_Request $request ) {
         $params = $request->get_params();
         if ( ! isset( $params['post_id'], $params['post_state'], $params['parts'], $params['action'], $params['fields'] ) ) {
-            return new WP_Error( __METHOD__, "Missing core parameters", [ 'status' => 400 ] );
+            return new WP_Error( __METHOD__, 'Missing core parameters', [ 'status' => 400 ] );
         }
 
         // Sanitize and fetch user id
@@ -1465,7 +1465,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             }
 
             // By default, assign to user and default to now as submission date
-            $updates['assigned_to'] = 'user-' . $params["parts"]["post_id"];
+            $updates['assigned_to'] = 'user-' . $params['parts']['post_id'];
             $updates['submit_date'] = time();
         }
 
@@ -1489,7 +1489,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     private function update_user_logged_in_state() {
         wp_set_current_user( 0 );
         $current_user = wp_get_current_user();
-        $current_user->add_cap( "magic_link" );
+        $current_user->add_cap( 'magic_link' );
         $current_user->display_name = __( 'Report Survey Collection', 'disciple_tools' );
     }
 }

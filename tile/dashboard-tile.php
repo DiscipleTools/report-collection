@@ -34,7 +34,7 @@ class Disciple_Tools_Survey_Collection_Dashboard_Tile extends DT_Dashboard_Tile 
             ], filemtime( Disciple_Tools_Survey_Collection::dir() . $script ), true );
 
             wp_localize_script(
-                $this->handle, "dt_survey_collection", array(
+                $this->handle, 'dt_survey_collection', array(
                     'dt_magic_link_types' => []
                 )
             );

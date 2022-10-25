@@ -414,10 +414,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     //filter at the start of post update
     public function dt_post_update_fields( $fields, $post_type, $post_id ) {
-        if ( $post_type === $this->post_type ) {
-            // execute your code here
-        }
-
         return $fields;
     }
 
@@ -425,7 +421,9 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         global $wpdb;
 
         // Calculate all-time global statistics.
+        // phpcs:disable
         $all_time_global_results = $wpdb->get_results( self::calculate_global_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
 
         // Capture all-time global result statistics.
         if ( ! empty( $all_time_global_results ) ) {
@@ -476,7 +474,9 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
         // Calculate year-to-date (ytd) statistics.
         if ( ! empty( $fields['submit_date'] ) ) {
+            // phpcs:disable
             $ytd_results = $wpdb->get_results( self::calculate_statistics_prepare_sql( $wpdb, $current_user_id, $fields['submit_date']['timestamp'], time(), $post_type ), ARRAY_A );
+            // phpcs:enable
 
             // Capture ytd result stats.
             if ( ! empty( $ytd_results ) ) {
@@ -492,7 +492,9 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         }
 
         // Calculate all-time statistics.
+        // phpcs:disable
         $all_time_results = $wpdb->get_results( self::calculate_statistics_prepare_sql( $wpdb, $current_user_id, 0, time(), $post_type ), ARRAY_A );
+        // phpcs:enable
 
         // Capture all time result stats.
         if ( ! empty( $all_time_results ) ) {

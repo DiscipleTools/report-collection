@@ -92,8 +92,8 @@ class Disciple_Tools_Survey_Collection_Tile {
                     <thead>
                     <tr>
                         <th></th>
-                        <th><?php echo __( 'YTD', 'disciple-tools-survey-collection' ) ?></th>
-                        <th><?php echo __( 'All Time', 'disciple-tools-survey-collection' ) ?></th>
+                        <th><?php echo esc_attr( __( 'YTD', 'disciple-tools-survey-collection' ) ) ?></th>
+                        <th><?php echo esc_attr( __( 'All Time', 'disciple-tools-survey-collection' ) ) ?></th>
                     </tr>
                     </thead>
                     <tbody>
