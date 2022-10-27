@@ -203,6 +203,10 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             .api-content-table tr:hover {
                 background-color: #f5f5f5;
             }
+
+            .highlight-selected {
+                background-color: #f5f5f5 !important;
+            }
         </style>
         <?php
     }
@@ -235,9 +239,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 'parts'                   => $this->parts,
                 'link_obj_id'             => $this->fetch_incoming_link_param( 'id' ),
                 'sys_type'                => $this->fetch_incoming_link_param( 'type' ),
+                'reports_field_settings'  => DT_Posts::get_post_field_settings( 'reports', false ),
                 'translations'            => [
                     'regions_of_focus' => __( 'Regions of Focus', 'disciple_tools' ),
-                    'all_locations'    => __( 'All Locations', 'disciple_tools' )
+                    'all_locations'    => __( 'All Locations', 'disciple_tools' ),
+                    'help'             => [
+                        'title'     => __( 'Field Description', 'disciple_tools' ),
+                        'close_but' => __( 'Close', 'disciple_tools' )
+                    ]
                 ],
                 'mapbox'                  => [
                     'map_key'        => DT_Mapbox_API::get_key(),
@@ -259,7 +268,11 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             window.get_magic = () => {
                 jQuery.ajax({
                     type: "GET",
-                    data: {action: 'get', parts: jsObject.parts},
+                    data: {
+                        action: 'get',
+                        parts: jsObject.parts,
+                        limit: 5
+                    },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: jsObject.root + jsObject.parts.root + '/v1/' + jsObject.parts.type,
@@ -300,7 +313,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 // Iterate over returned posts
                 if (data['posts']) {
                     data['posts'].forEach(v => {
-                        let html = `<tr onclick="get_assigned_report_details('${window.lodash.escape(v.id)}', '${window.lodash.escape(v.name)}');">
+                        let html = `<tr id="report_${window.lodash.escape(v.id)}" class="report-list-item" onclick="get_assigned_report_details('${window.lodash.escape(v.id)}', '${window.lodash.escape(v.name)}');">
                                 <td>${window.lodash.escape(v.name)}</td>
                             </tr>`;
                         table.find('tbody').append(html);
@@ -313,15 +326,76 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
              * Package & render field tr html
              */
 
-            window.generate_field_tr_html = (id, type, html) => {
+            window.generate_field_tr_html = (id, type, html, last) => {
                 return `<tr>
+                            <td style="width: 5%;">
+                                <button class="button select-button" onclick="display_report_field_help('${window.lodash.escape(id)}')">
+                                    <i class="mdi mdi-help"></i>
+                                </button>
+                            </td>
                             <td>
                                 <input id="form_content_table_field_id" type="hidden" value="${window.lodash.escape(id)}" />
                                 <input id="form_content_table_field_type" type="hidden" value="${window.lodash.escape(type)}" />
                                 <input id="form_content_table_field_meta" type="hidden" value="" />
                                 ${html}
                             </td>
+                            <td>
+                                ${window.lodash.escape(window.extract_last_value(last, id, type))}
+                            </td>
                         </tr>`;
+            };
+            window.extract_last_value = (last, field_id, field_type) => {
+                if (last && last[field_id]) {
+                    switch (field_type) {
+                        case 'number':
+                        case 'textarea':
+                        case 'text':
+                        case 'key_select': {
+                            return last[field_id];
+                        }
+                        case 'date': {
+                            return last[field_id]['formatted'];
+                        }
+                    }
+                }
+
+                return '';
+            };
+            window.display_report_field_help = (field_id) => {
+                let dialog = $('#report_field_help_dialog');
+                let field = jsObject.reports_field_settings[field_id];
+
+                if (dialog && field['name'] && field['description']) {
+
+                    // Update dialog div
+                    $(dialog).empty().append(field['description']);
+
+                    // Refresh dialog config
+                    dialog.dialog({
+                        modal: true,
+                        autoOpen: false,
+                        hide: 'fade',
+                        show: 'fade',
+                        height: 300,
+                        width: 450,
+                        resizable: true,
+                        title: jsObject.translations['help']['title'] + ' - ' + field['name'],
+                        buttons: [
+                            {
+                                text: jsObject.translations['help']['close_but'],
+                                icon: 'ui-icon-close',
+                                click: function () {
+                                    $(this).dialog('close');
+                                }
+                            }
+                        ],
+                        open: function (event, ui) {
+                        }
+                    });
+
+                    // Display updated dialog
+                    dialog.dialog('open');
+                }
             };
 
             /**
@@ -335,6 +409,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                 // Clear any previous errors
                 error.html('');
+
+                // Refresh report list item highlights
+                window.refresh_report_list_item_highlights(null);
 
                 table.fadeOut('fast', function () {
                     spinner.addClass('active');
@@ -373,11 +450,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                             // Iterate over, display and activate returned post fields.
                             data['fields'].forEach(field => {
-                                table.find('tbody').append(window.generate_field_tr_html(field['id'], field['type'], field['html']));
+                                table.find('tbody').append(window.generate_field_tr_html(field['id'], field['type'], field['html'], data['last']));
                             });
 
                             // Activate recently rendered field elements.
                             window.activate_field_controls(null);
+
+                            // Refresh report comments text area.
+                            window.refresh_report_comments(0, []);
 
                             // Display activated fields.
                             table.fadeIn('fast');
@@ -408,8 +488,17 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 // Update report name
                 report_name.html(post_name);
 
+                // Refresh report list item highlights
+                window.refresh_report_list_item_highlights(post_id);
+
                 // Fetch requested report details
                 window.get_report(post_id);
+            };
+            window.refresh_report_list_item_highlights = (post_id) => {
+                $('.report-list-item').removeClass('highlight-selected');
+                if (post_id) {
+                    $('#report_' + post_id).addClass('highlight-selected');
+                }
             };
 
             /**
@@ -420,6 +509,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 let spinner = jQuery('.details-loading-spinner');
                 let table = jQuery('.form-content-table');
                 let error = jQuery('#error');
+                let comment_count = 2;
 
                 // Clear any previous errors
                 error.html('');
@@ -442,6 +532,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             sys_type: jsObject.sys_type,
                             post_id: post_id,
                             link_obj_id: jsObject.link_obj_id,
+                            comment_count: comment_count,
                             ts: moment().unix() // Alter url shape, to force cache refresh!
                         },
                         contentType: "application/json; charset=utf-8",
@@ -456,14 +547,18 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                             // Capture post id for further downstream processing.
                             jQuery('#post_id').val(data['post']['ID']);
+                            jQuery('#post_state').val('update');
 
                             // Iterate over, display and activate returned post fields.
                             data['fields'].forEach(field => {
-                                table.find('tbody').append(window.generate_field_tr_html(field['id'], field['type'], field['html']));
+                                table.find('tbody').append(window.generate_field_tr_html(field['id'], field['type'], field['html'], data['last']));
                             });
 
                             // Activate recently rendered field elements.
                             window.activate_field_controls(data['post']);
+
+                            // Refresh report comments text area.
+                            window.refresh_report_comments(comment_count, data['comments']['comments']);
 
                             // Display activated fields.
                             table.fadeIn('fast');
@@ -707,6 +802,19 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                 }
                             };
 
+                            // Adjust start date based on post's date timestamp; if present
+                            if (post && post[field_id] && post[field_id]['timestamp']) {
+                                let start_ts = post[field_id]['timestamp'];
+                                date_config['startDate'] = moment.unix(start_ts);
+                                field_meta.val(start_ts);
+
+                            } else {
+
+                                // Default to current timestamp
+                                field_meta.val(moment().unix());
+                            }
+
+                            // Initialise date range picker and respond to selections
                             jQuery(tr).find('#' + field_id).daterangepicker(date_config, function (start, end, label) {
                                 if (start) {
                                     field_meta.val(start.unix());
@@ -830,6 +938,39 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             };
 
             /**
+             * Refresh report comments text area.
+             */
+
+            window.refresh_report_comments = (limit, comments) => {
+                let comments_div = jQuery('#form_content_comments_div');
+                let current_comments = jQuery('#form_content_current_comments');
+                let previous_comments = jQuery('#form_content_previous_comments');
+
+                comments_div.fadeOut('fast', function () {
+
+                    // Clear all comment types.
+                    current_comments.val('');
+                    previous_comments.empty();
+
+                    // If available, display past comments.
+                    if (comments) {
+                        let html_comments = '';
+                        let counter = 0;
+                        comments.forEach(comment => {
+                            if (counter++ < limit) { // Enforce comment count limit..!
+                                html_comments += `<b>${window.lodash.escape(comment['comment_author'])} @ ${window.lodash.escape(comment['comment_date'])}</b><br>`;
+                                html_comments += `${window.lodash.escape(comment['comment_content'])}<hr>`;
+                            }
+                        });
+                        previous_comments.html(html_comments);
+                    }
+
+                    // Display comments area.
+                    comments_div.fadeIn('fast');
+                });
+            };
+
+            /**
              * Submit contact details
              */
 
@@ -853,7 +994,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                         'parts': jsObject.parts,
                         'post_id': id,
                         'post_state': state,
-                        'fields': []
+                        'fields': [],
+                        'comments': jQuery('#form_content_current_comments').val()
                     }
 
                     // Iterate over form fields, capturing values accordingly.
@@ -1034,6 +1176,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                         id="total">0</span> ]</h3>
                             </td>
                             <td style="text-align: right;">
+                                <button id="view_all_reports_but"
+                                        class="button select-button"
+                                        onclick="window.open('<?php echo esc_url_raw( site_url('reports/') ); ?>','_blank');"><?php esc_html_e( 'View All Reports', 'disciple-tools-survey-collection' ) ?></button>
                                 <button id="new_report_but"
                                         class="button select-button"><?php esc_html_e( 'New Report', 'disciple-tools-survey-collection' ) ?></button>
                             </td>
@@ -1064,14 +1209,32 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     <input id="post_id" type="hidden"/>
                     <input id="post_state" type="hidden"/>
                     <table style="display: none;" class="form-content-table">
+                        <thead>
+                        <tr>
+                            <th style="width: 5%;"></th>
+                            <th></th>
+                            <th><?php esc_html_e( 'Last Report', 'disciple-tools-survey-collection' ) ?></th>
+                        </tr>
+                        </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="form_content_comments_div" style="display: none; min-width: 100%;">
+                        <textarea id="form_content_current_comments"
+                                  placeholder="<?php esc_html_e( 'Report Comments', 'disciple-tools-survey-collection' ) ?>"></textarea><br>
+
+                        <div id="form_content_previous_comments"></div>
+                    </div>
                 </div>
 
                 <!-- SUBMIT UPDATES -->
                 <button id="content_submit_but" style="display: none; min-width: 100%;" class="button select-button">
                     <?php esc_html_e( 'Submit Update', 'disciple-tools-survey-collection' ) ?>
                 </button>
+
+                <!-- FIELD HELP MODAL -->
+                <dialog id="report_field_help_dialog">
+                    Hello World...
+                </dialog>
             </div>
         </div>
         <?php
@@ -1156,20 +1319,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             wp_set_current_user( $user_id );
 
             // Fetch all assigned posts
-            $posts = DT_Posts::list_posts( 'reports', [
-                'limit'  => 1000,
-                'fields' => [
-                    [
-                        'assigned_to' => [ 'me' ]
-                    ],
-                    'status' => [
-                        'new',
-                        'unassigned',
-                        'assigned',
-                        'active'
-                    ]
-                ]
-            ] );
+            $posts = $this->list_reports( $params['limit'] ?? 5, '-submit_date' );
 
             // Revert to original user
             if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
@@ -1178,7 +1328,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
             // Iterate and return valid posts
             if ( ! empty( $posts ) && isset( $posts['posts'], $posts['total'] ) ) {
-                $data['total'] = $posts['total'];
+                $data['total'] = count( $posts['posts'] );
                 foreach ( $posts['posts'] ?? [] as $post ) {
                     $data['posts'][] = [
                         'id'   => $post['ID'],
@@ -1191,6 +1341,24 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         return $data;
     }
 
+    private function list_reports( $limit, $sort ): array {
+        return DT_Posts::list_posts( 'reports', [
+            'limit'  => $limit,
+            'sort'   => $sort,
+            'fields' => [
+                [
+                    'assigned_to' => [ 'me' ]
+                ],
+                'status' => [
+                    'new',
+                    'unassigned',
+                    'assigned',
+                    'active'
+                ]
+            ]
+        ] );
+    }
+
     public function new_post( WP_REST_Request $request ) {
         $params = $request->get_params();
         if ( ! isset( $params['parts'], $params['action'], $params['link_obj_id'] ) ) {
@@ -1198,12 +1366,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         }
 
         // Capture fields to be returned, with name field topping the list.
-        $fields = self::build_meta_report_survey_collection_fields();
-        array_unshift( $fields, [
-            'id'    => 'name',
-            'label' => __( 'Name', 'disciple_tools' )
-        ] );
-
+        $fields          = self::build_meta_report_survey_collection_fields();
         $field_settings  = DT_Posts::get_post_field_settings( 'reports', false );
         $link_obj        = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
         $fields_response = [];
@@ -1226,13 +1389,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
         // Package and return filtered fields.
         return [
-            'fields' => $fields_response
+            'fields' => $fields_response,
+            'last'   => $this->list_reports( 1, '-submit_date' )['posts'][0] ?? null
         ];
     }
 
     public function get_post( WP_REST_Request $request ) {
         $params = $request->get_params();
-        if ( ! isset( $params['post_id'], $params['parts'], $params['action'], $params['link_obj_id'] ) ) {
+        if ( ! isset( $params['post_id'], $params['parts'], $params['action'], $params['link_obj_id'], $params['comment_count'] ) ) {
             return new WP_Error( __METHOD__, 'Missing parameters', [ 'status' => 400 ] );
         }
 
@@ -1273,9 +1437,12 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 }
             }
 
-            $response['post']    = $post;
-            $response['fields']  = $fields_response;
-            $response['success'] = true;
+            // Return findings...
+            $response['post']     = $post;
+            $response['fields']   = $fields_response;
+            $response['comments'] = DT_Posts::get_post_comments( 'reports', $params['post_id'], false, 'all', [ 'number' => $params['comment_count'] ] );
+            $response['last']     = $this->list_reports( 1, '-submit_date' )['posts'][0] ?? null;
+            $response['success']  = true;
 
         } else {
             $response['success'] = false;
@@ -1325,6 +1492,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 case 'key_select':
                 case 'date':
                     $updates[ $field['id'] ] = $field['value'];
+
+                    // Ensure post name is also set to submission date
+                    if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) ) {
+                        $dt = new DateTime();
+                        $dt->setTimezone( new DateTimeZone( 'UTC' ) );
+                        $dt->setTimestamp( $field['value'] );
+                        $updates['name'] = $dt->format( 'F j, Y' );
+                    }
                     break;
 
                 case 'boolean':
@@ -1471,12 +1646,22 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
         // Update/Create post record accordingly, based on incoming flags.
         $updated_post = ( $params['post_state'] == 'new' ) ? DT_Posts::create_post( 'reports', $updates, false, false ) : DT_Posts::update_post( 'reports', $params['post_id'], $updates, false, false );
-
         if ( empty( $updated_post ) || is_wp_error( $updated_post ) ) {
             return [
                 'success' => false,
                 'message' => __( 'Unable to update report record details!', 'disciple_tools' )
             ];
+        }
+
+        // Add any available comments
+        if ( isset( $params['comments'] ) && ! empty( $params['comments'] ) ) {
+            $updated_comment = DT_Posts::add_post_comment( $updated_post['post_type'], $updated_post['ID'], $params['comments'], 'comment', [], false );
+            if ( empty( $updated_comment ) || is_wp_error( $updated_comment ) ) {
+                return [
+                    'success' => false,
+                    'message' => 'Unable to add comment to contact record details!'
+                ];
+            }
         }
 
         // Finally, return successful response

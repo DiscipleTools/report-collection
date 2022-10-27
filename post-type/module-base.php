@@ -179,18 +179,24 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'show_in_table' => 16,
             ];
 
-            // Details fields
-            $fields['submit_date'] = [
+            // Tracking fields
+            $fields['submit_date']    = [
                 'name'        => __( 'Submission Date', 'disciple-tools-survey-collection' ),
-                'description' => '',
+                'description' => __( 'Report submission date; which forms the basis of all statistical calculations.', 'disciple-tools-survey-collection' ),
                 'type'        => 'date',
                 'default'     => '',
-                'tile'        => 'details',
+                'tile'        => 'tracking',
                 'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
             ];
-
-            // Tracking fields
-            $fields['shares']        = [
+            $fields['rpt_start_date'] = [
+                'name'        => __( 'Report Start Date', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Report start date.', 'disciple-tools-survey-collection' ),
+                'type'        => 'date',
+                'default'     => '',
+                'tile'        => 'tracking',
+                'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
+            ];
+            $fields['shares']         = [
                 'name'          => __( 'Shares', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
@@ -199,7 +205,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/share.svg',
                 'show_in_table' => 11
             ];
-            $fields['prayers']       = [
+            $fields['prayers']        = [
                 'name'          => __( 'Prayers', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
@@ -208,7 +214,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/bible.svg',
                 'show_in_table' => 12
             ];
-            $fields['invites']       = [
+            $fields['invites']        = [
                 'name'          => __( 'Invites', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
@@ -217,7 +223,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/chat.svg',
                 'show_in_table' => 13
             ];
-            $fields['new_baptisms']  = [
+            $fields['new_baptisms']   = [
                 'name'          => __( 'New Baptisms', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
@@ -226,7 +232,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/baptism.svg',
                 'show_in_table' => 14
             ];
-            $fields['new_groups']    = [
+            $fields['new_groups']     = [
                 'name'          => __( 'New Groups', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
@@ -235,7 +241,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
                 'show_in_table' => 15
             ];
-            $fields['active_groups'] = [
+            $fields['active_groups']  = [
                 'name'          => __( 'Active Groups', 'disciple-tools-survey-collection' ),
                 'description'   => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
                 'type'          => 'number',
