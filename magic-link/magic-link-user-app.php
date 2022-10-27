@@ -1178,7 +1178,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             <td style="text-align: right;">
                                 <button id="view_all_reports_but"
                                         class="button select-button"
-                                        onclick="window.open('<?php echo esc_url_raw( site_url('reports/') ); ?>','_blank');"><?php esc_html_e( 'View All Reports', 'disciple-tools-survey-collection' ) ?></button>
+                                        onclick="window.open( '<?php echo esc_url_raw( site_url( 'reports/' ) ); ?>','_blank' );"><?php esc_html_e( 'View All Reports', 'disciple-tools-survey-collection' ) ?></button>
                                 <button id="new_report_but"
                                         class="button select-button"><?php esc_html_e( 'New Report', 'disciple-tools-survey-collection' ) ?></button>
                             </td>
