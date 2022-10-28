@@ -472,7 +472,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                             'active'
                         ]
                     ]
-                ] )['posts'][0]['active_groups'] ?? 0
+            ] )['posts'][0]['active_groups'] ?? 0
         ];
 
         return $statistics;
