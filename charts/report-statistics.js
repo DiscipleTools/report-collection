@@ -6,38 +6,52 @@
     show_metrics();
   });
 
-  var chart = null;
-
   function show_metrics() {
     let localizedObject = window.wp_js_object; // change this object to the one named in ui-menu-and-enqueue.php
     let translations = localizedObject.translations;
     let chartDiv = jQuery('#chart'); // retrieves the chart div in the metrics page
 
     chartDiv.empty().html(`
-      <span class="section-header">${localizedObject.translations.title}</span>
+      <span class="section-header">${localizedObject.translations.title}</span><br>
+      <span class="section-subheader">${localizedObject.translations.sub_title}</span><br>
       <hr style="max-width:100%;">
-      <div id="chartdiv" style="min-width: 100%; min-height: 500px;"></div>
+      <div id="chartdiv" style="min-width: 75%; max-width: 75%; min-height: 500px; margin: auto;"></div>
       <hr style="max-width:100%;">
       <button type="button" onclick="refresh_api_call()" class="button" id="refresh_button">${translations["refresh"]}</button>
       <div id="refresh_spinner" style="display: inline-block" class="loading-spinner"></div>
     `);
 
-    // Create chart instance
-    chart = am4core.create("chartdiv", am4charts.PieChart);
-
-    // Add data
-    chart.data = localizedObject.stats;
-
-    // Add and configure Series
-    var pieSeries = chart.series.push(new am4charts.PieSeries());
-    pieSeries.dataFields.value = "value";
-    pieSeries.dataFields.category = "label";
+    // Display statistics
+    jQuery('#chartdiv').empty().html(render_metrics_dashboard_stats_html(localizedObject.stats));
   }
 
-  window.refresh_api_call = function refresh_api_call(button_data) {
+  window.render_metrics_dashboard_stats_html = function (stats) {
+    let html = `<div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">`;
+
+    // Iterate and display stats
+    if (stats) {
+      jQuery.each(stats, function (idx, stat) {
+        if (stat['value'], stat['label']) {
+          html += `
+          <div style="margin-right: 30px; flex: 1 1 0;">
+            <div>
+                <span style="font-size: 60px; font-weight: bold; color: blue;">${window.lodash.escape(stat['value'])}</span>
+            </div>
+            <div>${window.lodash.escape(stat['label'])}</div>
+          </div>
+          `;
+        }
+      });
+    }
+
+    html += `</div>`;
+
+    return html;
+  }
+
+  window.refresh_api_call = function refresh_api_call() {
 
     let localizedObject = window.wp_js_object; // change this object to the one named in ui-menu-and-enqueue.php
-    let button = jQuery('#sample_button');
     $('#sample_spinner').addClass("active");
 
     let data = {};
@@ -56,9 +70,12 @@
         console.log('success');
         console.log(data);
 
-        // Refresh chart....
-        chart.data = data;
-        chart.validateData();
+        // Refresh stats....
+        let chart_div = jQuery('#chartdiv');
+        chart_div.fadeOut('fast', function () {
+          chart_div.empty().html(render_metrics_dashboard_stats_html(data));
+          chart_div.fadeIn('fast');
+        });
 
       })
       .fail(function (err) {

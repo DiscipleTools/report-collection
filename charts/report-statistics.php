@@ -62,8 +62,9 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                 'current_user_id'     => get_current_user_id(),
                 'stats'               => $this->stats( 0, time() ),
                 'translations'        => [
-                    'title'   => $this->title,
-                    'refresh' => __( 'Refresh', 'disciple-tools-survey-collection' )
+                    'title'     => $this->title,
+                    'sub_title' => __( 'Year-To-Date (YTD) Report Statistics', 'disciple-tools-survey-collection' ),
+                    'refresh'   => __( 'Refresh', 'disciple-tools-survey-collection' )
                 ]
             ]
         );
@@ -95,28 +96,28 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
         $packaged_stats = [];
         $stats          = [
             [
-                'key'   => 'new_baptisms',
-                'label' => __( 'New Baptisms', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_new_baptisms',
+                'label' => __( 'Total Global New Baptisms', 'disciple-tools-survey-collection' )
             ],
             [
-                'key'   => 'new_groups',
-                'label' => __( 'New Groups', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_new_groups',
+                'label' => __( 'Total Global New Groups', 'disciple-tools-survey-collection' )
             ],
             [
-                'key'   => 'active_groups',
-                'label' => __( 'Active Groups', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_shares',
+                'label' => __( 'Total Global Shares', 'disciple-tools-survey-collection' )
             ],
             [
-                'key'   => 'shares',
-                'label' => __( 'Shares', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_prayers',
+                'label' => __( 'Total Global Prayers', 'disciple-tools-survey-collection' )
             ],
             [
-                'key'   => 'prayers',
-                'label' => __( 'Prayers', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_invites',
+                'label' => __( 'Total Global Invites', 'disciple-tools-survey-collection' )
             ],
             [
-                'key'   => 'invites',
-                'label' => __( 'Invites', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_active_groups',
+                'label' => __( 'Current Global Active Groups', 'disciple-tools-survey-collection' )
             ]
         ];
         if ( ! empty( $raw_stats ) ) {

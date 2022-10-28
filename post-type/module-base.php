@@ -54,6 +54,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 10, 3 );
         add_action( 'dt_comment_created', [ $this, 'dt_comment_created' ], 10, 4 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
+        add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
 
         //list
         add_filter( 'dt_user_list_filters', [ $this, 'dt_user_list_filters' ], 10, 2 );
@@ -153,8 +154,8 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'description'   => __( 'Set the current status.', 'disciple-tools-survey-collection' ),
                 'type'          => 'key_select',
                 'default'       => [
-                    'inactive' => [
-                        'label'       => __( 'Inactive', 'disciple-tools-survey-collection' ),
+                    'archive' => [
+                        'label'       => __( 'Archived', 'disciple-tools-survey-collection' ),
                         'description' => __( 'No longer active.', 'disciple-tools-survey-collection' ),
                         'color'       => '#F43636'
                     ],
@@ -250,92 +251,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg',
                 'show_in_table' => 16
             ];
-
-            // Statistics fields
-            $fields['new_baptisms_ytd']       = [
-                'name'        => __( 'New Baptisms [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/baptism.svg'
-            ];
-            $fields['new_groups_ytd']         = [
-                'name'        => __( 'New Groups [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/add-group.svg'
-            ];
-            $fields['active_groups_ytd']      = [
-                'name'        => __( 'Active Groups [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/groups.svg'
-            ];
-            $fields['shares_ytd']             = [
-                'name'        => __( 'Shares [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/share.svg'
-            ];
-            $fields['prayers_ytd']            = [
-                'name'        => __( 'Prayers [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/bible.svg'
-            ];
-            $fields['invites_ytd']            = [
-                'name'        => __( 'Invites [YTD]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/chat.svg'
-            ];
-            $fields['new_baptisms_all_time']  = [
-                'name'        => __( 'New Baptisms [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total New Baptisms.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/baptism.svg'
-            ];
-            $fields['new_groups_all_time']    = [
-                'name'        => __( 'New Groups [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total New Groups.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/add-group.svg'
-            ];
-            $fields['active_groups_all_time'] = [
-                'name'        => __( 'Active Groups [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Active Groups.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/groups.svg'
-            ];
-            $fields['shares_all_time']        = [
-                'name'        => __( 'Shares [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Shares.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/share.svg'
-            ];
-            $fields['prayers_all_time']       = [
-                'name'        => __( 'Prayers [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Prayers.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/bible.svg'
-            ];
-            $fields['invites_all_time']       = [
-                'name'        => __( 'Invites [All Time]', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Count of total Invites.', 'disciple-tools-survey-collection' ),
-                'type'        => 'number',
-                'default'     => '',
-                'icon'        => get_template_directory_uri() . '/dt-assets/images/chat.svg'
-            ];
         }
 
         return $fields;
@@ -423,6 +338,27 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         return $fields;
     }
 
+    public function render_metrics_dashboard_stats_html( $stats ) {
+        ?>
+        <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+            <?php
+            foreach ( $stats ?? [] as $stat ) {
+                if ( isset( $stat['value'], $stat['label'] ) ) {
+                    ?>
+                    <div style="margin-right: 30px; flex: 1 1 0;">
+                        <div><span
+                                style="font-size: 60px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ) ) ?></span>
+                        </div>
+                        <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                    </div>
+                    <?php
+                }
+            }
+            ?>
+        </div>
+        <?php
+    }
+
     public function calculate_global_statistics( $stats, $post_type, $start_ts, $end_ts ) {
         global $wpdb;
 
@@ -433,12 +369,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
         // Capture all-time global result statistics.
         if ( ! empty( $all_time_global_results ) ) {
-            $stats['new_baptisms']  = $all_time_global_results[0]['new_baptisms'];
-            $stats['new_groups']    = $all_time_global_results[0]['new_groups'];
-            $stats['active_groups'] = $all_time_global_results[0]['active_groups'];
-            $stats['shares']        = $all_time_global_results[0]['shares'];
-            $stats['prayers']       = $all_time_global_results[0]['prayers'];
-            $stats['invites']       = $all_time_global_results[0]['invites'];
+            $stats['stats_new_baptisms'] = $all_time_global_results[0]['new_baptisms'];
+            $stats['stats_new_groups']   = $all_time_global_results[0]['new_groups'];
+            $stats['stats_shares']       = $all_time_global_results[0]['shares'];
+            $stats['stats_prayers']      = $all_time_global_results[0]['prayers'];
+            $stats['stats_invites']      = $all_time_global_results[0]['invites'];
+        }
+
+        // Capture active groups global statistics.
+        // phpcs:disable
+        $active_groups_global_results = $wpdb->get_results( self::calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
+        if ( ! empty( $active_groups_global_results ) ) {
+            $stats['stats_active_groups'] = $active_groups_global_results[0]['active_groups'];
         }
 
         return $stats;
@@ -453,20 +396,21 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
             // Accordingly update corresponding statistics fields.
             if ( isset( $statistics['ytd'] ) ) {
-                $fields['new_baptisms_ytd']  = $statistics['ytd']['new_baptisms'];
-                $fields['new_groups_ytd']    = $statistics['ytd']['new_groups'];
-                $fields['active_groups_ytd'] = $statistics['ytd']['active_groups'];
-                $fields['shares_ytd']        = $statistics['ytd']['shares'];
-                $fields['prayers_ytd']       = $statistics['ytd']['prayers'];
-                $fields['invites_ytd']       = $statistics['ytd']['invites'];
+                $fields['stats_new_baptisms_ytd'] = $statistics['ytd']['new_baptisms'];
+                $fields['stats_new_groups_ytd']   = $statistics['ytd']['new_groups'];
+                $fields['stats_shares_ytd']       = $statistics['ytd']['shares'];
+                $fields['stats_prayers_ytd']      = $statistics['ytd']['prayers'];
+                $fields['stats_invites_ytd']      = $statistics['ytd']['invites'];
             }
             if ( isset( $statistics['all_time'] ) ) {
-                $fields['new_baptisms_all_time']  = $statistics['all_time']['new_baptisms'];
-                $fields['new_groups_all_time']    = $statistics['all_time']['new_groups'];
-                $fields['active_groups_all_time'] = $statistics['all_time']['active_groups'];
-                $fields['shares_all_time']        = $statistics['all_time']['shares'];
-                $fields['prayers_all_time']       = $statistics['all_time']['prayers'];
-                $fields['invites_all_time']       = $statistics['all_time']['invites'];
+                $fields['stats_new_baptisms_all_time'] = $statistics['all_time']['new_baptisms'];
+                $fields['stats_new_groups_all_time']   = $statistics['all_time']['new_groups'];
+                $fields['stats_shares_all_time']       = $statistics['all_time']['shares'];
+                $fields['stats_prayers_all_time']      = $statistics['all_time']['prayers'];
+                $fields['stats_invites_all_time']      = $statistics['all_time']['invites'];
+            }
+            if ( $statistics['misc'] ) {
+                $fields['stats_active_groups'] = $statistics['misc']['active_groups'];
             }
         }
 
@@ -489,7 +433,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 $statistics['ytd'] = [
                     'new_baptisms'  => $ytd_results[0]['new_baptisms'],
                     'new_groups'    => $ytd_results[0]['new_groups'],
-                    'active_groups' => $ytd_results[0]['active_groups'],
                     'shares'        => $ytd_results[0]['shares'],
                     'prayers'       => $ytd_results[0]['prayers'],
                     'invites'       => $ytd_results[0]['invites']
@@ -507,46 +450,76 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             $statistics['all_time'] = [
                 'new_baptisms'  => $all_time_results[0]['new_baptisms'],
                 'new_groups'    => $all_time_results[0]['new_groups'],
-                'active_groups' => $all_time_results[0]['active_groups'],
                 'shares'        => $all_time_results[0]['shares'],
                 'prayers'       => $all_time_results[0]['prayers'],
                 'invites'       => $all_time_results[0]['invites']
             ];
         }
 
+        // Capture miscellaneous stats.
+        $statistics['misc'] = [
+            'active_groups' => DT_Posts::list_posts( 'reports', [
+                    'limit'  => 1,
+                    'sort'   => '-submit_date',
+                    'fields' => [
+                        [
+                            'assigned_to' => [ 'me' ]
+                        ],
+                        'status' => [
+                            'new',
+                            'unassigned',
+                            'assigned',
+                            'active'
+                        ]
+                    ]
+                ] )['posts'][0]['active_groups'] ?? 0
+        ];
+
         return $statistics;
     }
 
     private function calculate_statistics_prepare_sql( $wpdb, $user_id, $start_ts, $end_ts, $post_type ) {
         return $wpdb->prepare( "
-            SELECT SUM(pm_baptisms.meta_value) new_baptisms, SUM(pm_new_groups.meta_value) new_groups, SUM(pm_groups.meta_value) active_groups, SUM(pm_shares.meta_value) shares, SUM(pm_prayers.meta_value) prayers, SUM(pm_invites.meta_value) invites
+        SELECT SUM(new_baptisms) new_baptisms, SUM(new_groups) new_groups, SUM(shares) shares, SUM(prayers) prayers, SUM(invites) invites
+            FROM (SELECT DISTINCT p.ID, (pm_baptisms.meta_value) new_baptisms, (pm_new_groups.meta_value) new_groups, (pm_shares.meta_value) shares, (pm_prayers.meta_value) prayers, (pm_invites.meta_value) invites
             FROM $wpdb->posts p
             INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to' AND pm.meta_value = CONCAT( 'user-', %s ))
             INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
             INNER JOIN $wpdb->postmeta pm_baptisms ON (p.ID = pm_baptisms.post_id) AND (pm_baptisms.meta_key = 'new_baptisms')
             INNER JOIN $wpdb->postmeta pm_new_groups ON (p.ID = pm_new_groups.post_id) AND (pm_new_groups.meta_key = 'new_groups')
-            INNER JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
             INNER JOIN $wpdb->postmeta pm_shares ON (p.ID = pm_shares.post_id) AND (pm_shares.meta_key = 'shares')
             INNER JOIN $wpdb->postmeta pm_prayers ON (p.ID = pm_prayers.post_id) AND (pm_prayers.meta_key = 'prayers')
             INNER JOIN $wpdb->postmeta pm_invites ON (p.ID = pm_invites.post_id) AND (pm_invites.meta_key = 'invites')
-            WHERE p.post_type = %s
+            WHERE p.post_type = %s) AS user_stats
             ", $user_id, $start_ts, $end_ts, $post_type );
     }
 
     private function calculate_global_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
         return $wpdb->prepare( "
-        SELECT SUM(new_baptisms) new_baptisms, SUM(new_groups) new_groups, SUM(active_groups) active_groups, SUM(shares) shares, SUM(prayers) prayers, SUM(invites) invites
-            FROM (SELECT DISTINCT p.ID, (pm_baptisms.meta_value) new_baptisms, (pm_new_groups.meta_value) new_groups, (pm_groups.meta_value) active_groups, (pm_shares.meta_value) shares, (pm_prayers.meta_value) prayers, (pm_invites.meta_value) invites
+        SELECT SUM(new_baptisms) new_baptisms, SUM(new_groups) new_groups, SUM(shares) shares, SUM(prayers) prayers, SUM(invites) invites
+            FROM (SELECT DISTINCT p.ID, (pm_baptisms.meta_value) new_baptisms, (pm_new_groups.meta_value) new_groups, (pm_shares.meta_value) shares, (pm_prayers.meta_value) prayers, (pm_invites.meta_value) invites
             FROM $wpdb->posts p
             INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id)
             INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
             INNER JOIN $wpdb->postmeta pm_baptisms ON (p.ID = pm_baptisms.post_id) AND (pm_baptisms.meta_key = 'new_baptisms')
             INNER JOIN $wpdb->postmeta pm_new_groups ON (p.ID = pm_new_groups.post_id) AND (pm_new_groups.meta_key = 'new_groups')
-            INNER JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
             INNER JOIN $wpdb->postmeta pm_shares ON (p.ID = pm_shares.post_id) AND (pm_shares.meta_key = 'shares')
             INNER JOIN $wpdb->postmeta pm_prayers ON (p.ID = pm_prayers.post_id) AND (pm_prayers.meta_key = 'prayers')
             INNER JOIN $wpdb->postmeta pm_invites ON (p.ID = pm_invites.post_id) AND (pm_invites.meta_key = 'invites')
-            WHERE p.post_type = %s) AS stats
+            WHERE p.post_type = %s) AS global_stats
+            ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
+        return $wpdb->prepare( "
+        SELECT SUM(active_groups) active_groups
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_groups.meta_value) active_groups, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            INNER JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC LIMIT 1) AS global_active_groups_stats
             ", $start_ts, $end_ts, $post_type );
     }
 

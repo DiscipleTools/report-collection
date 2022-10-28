@@ -51,38 +51,32 @@ class Disciple_Tools_Survey_Collection_Tile {
 
     public function dt_add_section( $section, $post_type ) {
         if ( ( $post_type === 'reports' ) && $section === 'statistics' ) {
-            $post             = DT_Posts::get_post( $post_type, get_the_ID() );
-            $post_type_fields = DT_Posts::get_post_field_settings( $post_type );
-            $stats_fields     = [
+            $post         = DT_Posts::get_post( $post_type, get_the_ID() );
+            $stats_fields = [
                 [
                     'label'    => __( 'New Baptisms', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'new_baptisms_ytd',
-                    'all_time' => 'new_baptisms_all_time'
+                    'ytd'      => 'stats_new_baptisms_ytd',
+                    'all_time' => 'stats_new_baptisms_all_time'
                 ],
                 [
                     'label'    => __( 'New Groups', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'new_groups_ytd',
-                    'all_time' => 'new_groups_all_time'
-                ],
-                [
-                    'label'    => __( 'Active Groups', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'active_groups_ytd',
-                    'all_time' => 'active_groups_all_time'
+                    'ytd'      => 'stats_new_groups_ytd',
+                    'all_time' => 'stats_new_groups_all_time'
                 ],
                 [
                     'label'    => __( 'Shares', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'shares_ytd',
-                    'all_time' => 'shares_all_time'
+                    'ytd'      => 'stats_shares_ytd',
+                    'all_time' => 'stats_shares_all_time'
                 ],
                 [
                     'label'    => __( 'Prayers', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'prayers_ytd',
-                    'all_time' => 'prayers_all_time'
+                    'ytd'      => 'stats_prayers_ytd',
+                    'all_time' => 'stats_prayers_all_time'
                 ],
                 [
                     'label'    => __( 'Invites', 'disciple-tools-survey-collection' ),
-                    'ytd'      => 'invites_ytd',
-                    'all_time' => 'invites_all_time'
+                    'ytd'      => 'stats_invites_ytd',
+                    'all_time' => 'stats_invites_all_time'
                 ]
             ];
             ?>
