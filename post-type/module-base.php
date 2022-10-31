@@ -721,10 +721,9 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     private static function get_assigned_users_filters() {
         $assigned_users          = [];
-        $users                   = DT_User_Management::get_users();
         $current_user_id         = get_current_user_id();
         $current_user_contact_id = Disciple_Tools_Users::get_contact_for_user( $current_user_id );
-        if ( ! empty( $users ) && ! is_wp_error( $current_user_contact_id ) ) {
+        if ( ! is_wp_error( $current_user_contact_id ) ) {
 
             // Obtain current user contact record and identify any corresponding coaching users.
             $current_user_contact = DT_Posts::get_post( 'contacts', $current_user_contact_id, false );
@@ -732,14 +731,13 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
                 // Build returning users array.
                 foreach ( $current_user_contact['coaching'] ?? [] as $coached ) {
-                    foreach ( $users as $user ) {
-                        if ( Disciple_Tools_Users::get_contact_for_user( $user['ID'] ) == $coached['ID'] ) {
-                            $assigned_users[] = [
-                                'user_id'    => $user['ID'],
-                                'contact_id' => $coached['ID'],
-                                'name'       => $user['display_name']
-                            ];
-                        }
+                    $corresponds_to_user = get_post_meta( $coached['ID'], 'corresponds_to_user', true );
+                    if ( ! empty( $corresponds_to_user ) && ! is_wp_error( $corresponds_to_user ) ) {
+                        $assigned_users[] = [
+                            'user_id'    => $corresponds_to_user,
+                            'contact_id' => $coached['ID'],
+                            'name'       => $coached['post_title']
+                        ];
                     }
                 }
             }
