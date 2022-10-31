@@ -90,11 +90,16 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
      * so as to enable localisation changes. Otherwise the system translation passed in to the custom post type
      * will prevail.
      */
-    public function dt_get_post_type_settings( $settings, $post_type ){
-        if ( $post_type === $this->post_type ){
+    public function dt_get_post_type_settings( $settings, $post_type ) {
+        if ( $post_type === $this->post_type ) {
             $settings['label_singular'] = __( 'Report', 'disciple-tools-survey-collection' );
-            $settings['label_plural'] = __( 'Reports', 'disciple-tools-survey-collection' );
+            $settings['label_plural']   = __( 'Reports', 'disciple-tools-survey-collection' );
+            $settings['status_field']   = [
+                'status_key'   => 'status',
+                'archived_key' => 'archive',
+            ];
         }
+
         return $settings;
     }
 
@@ -204,7 +209,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/share.svg',
-                'show_in_table' => 11
+                'show_in_table' => 10
             ];
             $fields['prayers']        = [
                 'name'          => __( 'Prayers', 'disciple-tools-survey-collection' ),
@@ -213,7 +218,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/bible.svg',
-                'show_in_table' => 12
+                'show_in_table' => 11
             ];
             $fields['invites']        = [
                 'name'          => __( 'Invites', 'disciple-tools-survey-collection' ),
@@ -222,7 +227,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/chat.svg',
-                'show_in_table' => 13
+                'show_in_table' => 12
             ];
             $fields['new_baptisms']   = [
                 'name'          => __( 'New Baptisms', 'disciple-tools-survey-collection' ),
@@ -231,7 +236,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/baptism.svg',
-                'show_in_table' => 14
+                'show_in_table' => 13
             ];
             $fields['new_groups']     = [
                 'name'          => __( 'New Groups', 'disciple-tools-survey-collection' ),
@@ -240,7 +245,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
-                'show_in_table' => 15
+                'show_in_table' => 14
             ];
             $fields['active_groups']  = [
                 'name'          => __( 'Active Groups', 'disciple-tools-survey-collection' ),
@@ -249,7 +254,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'default'       => '',
                 'tile'          => 'tracking',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg',
-                'show_in_table' => 16
+                'show_in_table' => 15
             ];
         }
 
@@ -593,73 +598,30 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
          * @todo process and build filter lists
          */
         if ( $post_type === self::post_type() ){
-            $counts = self::get_my_status();
             $fields = DT_Posts::get_post_field_settings( $post_type );
             /**
              * Setup my filters
              */
-            $active_counts = [];
-            $update_needed = 0;
-            $status_counts = [];
-            $total_my = 0;
-            foreach ( $counts as $count ){
-                $total_my += $count['count'];
-                dt_increment( $status_counts[$count['status']], $count['count'] );
-                if ( $count['status'] === 'active' ){
-                    if ( isset( $count['update_needed'] ) ) {
-                        $update_needed += (int) $count['update_needed'];
-                    }
-                    dt_increment( $active_counts[$count['status']], $count['count'] );
-                }
-            }
 
+            // add assigned users filters
+            $assigned_users    = self::get_assigned_users_filters();
             $filters['tabs'][] = [
-                'key' => 'assigned_to_me',
-                'label' => __( 'Assigned to me', 'disciple-tools-survey-collection' ),
-                'count' => $total_my,
+                'key'   => 'assigned_users',
+                'label' => __( 'Assigned Users', 'disciple-tools-survey-collection' ),
+                'count' => count( $assigned_users ),
                 'order' => 20
             ];
-            // add assigned to me filters
-            $filters['filters'][] = [
-                'ID' => 'my_all',
-                'tab' => 'assigned_to_me',
-                'name' => __( 'All', 'disciple-tools-survey-collection' ),
-                'query' => [
-                    'assigned_to' => [ 'me' ],
-                    'sort' => 'status'
-                ],
-                'count' => $total_my,
-            ];
-            foreach ( $fields['status']['default'] as $status_key => $status_value ) {
-                if ( isset( $status_counts[$status_key] ) ){
-                    $filters['filters'][] = [
-                        'ID' => 'my_' . $status_key,
-                        'tab' => 'assigned_to_me',
-                        'name' => $status_value['label'],
-                        'query' => [
-                            'assigned_to' => [ 'me' ],
-                            'status' => [ $status_key ],
-                            'sort' => '-post_date'
-                        ],
-                        'count' => $status_counts[$status_key]
-                    ];
-                    if ( $status_key === 'active' ){
-                        if ( $update_needed > 0 ){
-                            $filters['filters'][] = [
-                                'ID' => 'my_update_needed',
-                                'tab' => 'assigned_to_me',
-                                'name' => $fields['requires_update']['name'],
-                                'query' => [
-                                    'assigned_to' => [ 'me' ],
-                                    'status' => [ 'active' ],
-                                    'requires_update' => [ true ],
-                                ],
-                                'count' => $update_needed,
-                                'subfilter' => true
-                            ];
-                        }
-                    }
-                }
+
+            foreach ( $assigned_users as $user ) {
+                $filters['filters'][] = [
+                    'ID'    => 'user_' . $user['user_id'],
+                    'tab'   => 'assigned_users',
+                    'name'  => $user['name'],
+                    'query' => [
+                        'assigned_to' => [ $user['user_id'] ],
+                        'sort'        => 'status'
+                    ]
+                ];
             }
 
             if ( current_user_can( 'view_any_' . self::post_type() ) ){
@@ -694,6 +656,16 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     ],
                     'count' => $total_all
                 ];
+                $filters['filters'][] = [
+                    'ID'    => 'my_all',
+                    'tab'   => 'all',
+                    'name'  => __( 'Assigned to me', 'disciple-tools-survey-collection' ),
+                    'query' => [
+                        'assigned_to' => [ 'me' ],
+                        'sort'        => 'status'
+                    ],
+                    'count' => $total_all,
+                ];
 
                 foreach ( $fields['status']['default'] as $status_key => $status_value ) {
                     if ( isset( $status_counts[$status_key] ) ){
@@ -721,21 +693,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                                     'subfilter' => true
                                 ];
                             }
-//                        foreach ( $fields["type"]["default"] as $type_key => $type_value ) {
-//                            if ( isset( $active_counts[$type_key] ) ) {
-//                                $filters["filters"][] = [
-//                                    "ID" => 'all_' . $type_key,
-//                                    "tab" => 'all',
-//                                    "name" => $type_value["label"],
-//                                    "query" => [
-//                                        'status' => [ 'active' ],
-//                                        'sort' => 'name'
-//                                    ],
-//                                    "count" => $active_counts[$type_key],
-//                                    'subfilter' => true
-//                                ];
-//                            }
-//                        }
                         }
                     }
                 }
@@ -761,6 +718,36 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             // @todo add enqueue scripts
         }
     }
+
+    private static function get_assigned_users_filters() {
+        $assigned_users          = [];
+        $users                   = DT_User_Management::get_users();
+        $current_user_id         = get_current_user_id();
+        $current_user_contact_id = Disciple_Tools_Users::get_contact_for_user( $current_user_id );
+        if ( ! empty( $users ) && ! is_wp_error( $current_user_contact_id ) ) {
+
+            // Obtain current user contact record and identify any corresponding coaching users.
+            $current_user_contact = DT_Posts::get_post( 'contacts', $current_user_contact_id, false );
+            if ( ! empty( $current_user_contact ) && ! is_wp_error( $current_user_contact ) && isset( $current_user_contact['coaching'] ) ) {
+
+                // Build returning users array.
+                foreach ( $current_user_contact['coaching'] ?? [] as $coached ) {
+                    foreach ( $users as $user ) {
+                        if ( Disciple_Tools_Users::get_contact_for_user( $user['ID'] ) == $coached['ID'] ) {
+                            $assigned_users[] = [
+                                'user_id'    => $user['ID'],
+                                'contact_id' => $coached['ID'],
+                                'name'       => $user['display_name']
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $assigned_users;
+    }
+
 }
 
 
