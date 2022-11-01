@@ -53,6 +53,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
         add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 10, 3 );
         add_action( 'dt_comment_created', [ $this, 'dt_comment_created' ], 10, 4 );
+        add_filter( 'survey_collection_metrics_user_stats', [ $this, 'calculate_user_statistics' ], 10, 2 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
         add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
 
@@ -392,40 +393,54 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         return $stats;
     }
 
+    public function calculate_user_statistics( $stats, $current_user_id ) {
+
+        // Calculate collective report record statistics.
+        $raw_statistics = self::calculate_statistics( [], $this->post_type, $current_user_id );
+
+        // Package and return calculated statistics.
+        return self::package_calculated_statistics( $stats, $raw_statistics );
+    }
+
     //filter following get post requests
     public function dt_after_get_post_fields_filter( $fields, $post_type ) {
         if ( $post_type === $this->post_type ) {
 
             // Calculate collective report record statistics.
-            $statistics = self::calculate_statistics( $fields, $post_type );
+            $statistics = self::calculate_statistics( $fields, $post_type, get_current_user_id() );
 
-            // Accordingly update corresponding statistics fields.
-            if ( isset( $statistics['ytd'] ) ) {
-                $fields['stats_new_baptisms_ytd'] = $statistics['ytd']['new_baptisms'];
-                $fields['stats_new_groups_ytd']   = $statistics['ytd']['new_groups'];
-                $fields['stats_shares_ytd']       = $statistics['ytd']['shares'];
-                $fields['stats_prayers_ytd']      = $statistics['ytd']['prayers'];
-                $fields['stats_invites_ytd']      = $statistics['ytd']['invites'];
-            }
-            if ( isset( $statistics['all_time'] ) ) {
-                $fields['stats_new_baptisms_all_time'] = $statistics['all_time']['new_baptisms'];
-                $fields['stats_new_groups_all_time']   = $statistics['all_time']['new_groups'];
-                $fields['stats_shares_all_time']       = $statistics['all_time']['shares'];
-                $fields['stats_prayers_all_time']      = $statistics['all_time']['prayers'];
-                $fields['stats_invites_all_time']      = $statistics['all_time']['invites'];
-            }
-            if ( $statistics['misc'] ) {
-                $fields['stats_active_groups'] = $statistics['misc']['active_groups'];
-            }
+            // Package and return calculated statistics.
+            return self::package_calculated_statistics( $fields, $statistics );
         }
 
         return $fields;
     }
 
-    private function calculate_statistics( $fields, $post_type ) {
+    private function package_calculated_statistics( $packaged_stats, $raw_stats ) {
+        if ( isset( $raw_stats['ytd'] ) ) {
+            $packaged_stats['stats_new_baptisms_ytd'] = $raw_stats['ytd']['new_baptisms'];
+            $packaged_stats['stats_new_groups_ytd']   = $raw_stats['ytd']['new_groups'];
+            $packaged_stats['stats_shares_ytd']       = $raw_stats['ytd']['shares'];
+            $packaged_stats['stats_prayers_ytd']      = $raw_stats['ytd']['prayers'];
+            $packaged_stats['stats_invites_ytd']      = $raw_stats['ytd']['invites'];
+        }
+        if ( isset( $raw_stats['all_time'] ) ) {
+            $packaged_stats['stats_new_baptisms_all_time'] = $raw_stats['all_time']['new_baptisms'];
+            $packaged_stats['stats_new_groups_all_time']   = $raw_stats['all_time']['new_groups'];
+            $packaged_stats['stats_shares_all_time']       = $raw_stats['all_time']['shares'];
+            $packaged_stats['stats_prayers_all_time']      = $raw_stats['all_time']['prayers'];
+            $packaged_stats['stats_invites_all_time']      = $raw_stats['all_time']['invites'];
+        }
+        if ( $raw_stats['misc'] ) {
+            $packaged_stats['stats_active_groups'] = $raw_stats['misc']['active_groups'];
+        }
+
+        return $packaged_stats;
+    }
+
+    private function calculate_statistics( $fields, $post_type, $current_user_id ) {
         global $wpdb;
-        $current_user_id = get_current_user_id();
-        $statistics      = [];
+        $statistics = [];
 
         // Calculate year-to-date (ytd) statistics.
         if ( ! empty( $fields['submit_date'] ) ) {
@@ -468,7 +483,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     'sort'   => '-submit_date',
                     'fields' => [
                         [
-                            'assigned_to' => [ 'me' ]
+                            'assigned_to' => [ $current_user_id ]
                         ],
                         'status' => [
                             'new',
