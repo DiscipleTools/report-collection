@@ -151,9 +151,6 @@ class Disciple_Tools_Survey_Collection_Tile {
                 ?>
 
                 <div class="cell small-12 medium-4">
-                    <?php
-                    //render_field_for_display( 'groups_count', DT_Posts::get_post_field_settings( 'contacts', false ), $user_contacts_record );
-                    ?>
                     <table>
                         <thead>
                         <tr>
