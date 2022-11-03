@@ -56,14 +56,40 @@ class Disciple_Tools_Survey_Collection_Tile {
      */
     public function dt_custom_fields( array $fields, string $post_type = '' ) {
         if ( $post_type === 'contacts' ) {
-            $fields['groups_count'] = [
-                'name'         => __( 'Number of groups', 'disciple-tools-survey-collection' ),
-                'description'  => __( 'Current count of total number of assigned groups.', 'disciple-tools-survey-collection' ),
+            $fields['rpt_groups_count'] = [
+                'name'         => __( 'Number of groups in country and people group', 'disciple-tools-survey-collection' ),
+                'description'  => __( 'Current count of total number of groups in country and people groups.', 'disciple-tools-survey-collection' ),
                 'type'         => 'number',
                 'default'      => 0,
                 'tile'         => 'reports',
                 'icon'         => get_template_directory_uri() . '/dt-assets/images/groups.svg',
                 'customizable' => false
+            ];
+            $fields['rpt_movement']     = [
+                'name'          => __( 'Movement Stage', 'disciple-tools-plugin-starter-template' ),
+                'description'   => __( 'Current movement stage.', 'disciple-tools-plugin-starter-template' ),
+                'type'          => 'key_select',
+                'default'       => [
+                    '1',
+                    '1.1',
+                    '1.2',
+                    '1.3',
+                    '1.4',
+                    '1.5',
+                    '1.6',
+                    '1.7',
+                    '1.8',
+                    '1.9',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                    '6',
+                    '7'
+                ],
+                'tile'          => 'reports',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/stream.svg',
+                'default_color' => '#366184',
             ];
         }
 
@@ -143,11 +169,26 @@ class Disciple_Tools_Survey_Collection_Tile {
                 $statistics = apply_filters( 'survey_collection_metrics_user_stats', [], $corresponds_to_user );
 
                 // Fetch corresponding magic link, currently assigned to user.
-                $user_contacts_record = DT_Posts::get_post( $post_type, get_the_ID() );
+                // TODO: Corresponding link_obj_id required in order to correctly generate link! Operating at user level and not post!
+                /*$user_contacts_record = DT_Posts::get_post( $post_type, get_the_ID() );
                 $magic_link_apps      = dt_get_registered_types();
-                $rsc_app              = $magic_link_apps['rsc_magic_app']['rsc_user_app'] ?? null;
-                $rsc_ml_key           = $user_contacts_record[ $rsc_app['meta_key'] ] ?? null;
-                $rsc_ml_url           = isset( $rsc_ml_key ) ? esc_url( site_url() . '/' . $rsc_app['root'] . '/' . $rsc_app['type'] . '/' . $rsc_ml_key ) : null;
+                $rsc_app              = $magic_link_apps['report-survey']['my'] ?? null;
+                $meta_key             = $rsc_app['meta_key'];
+                $rsc_ml_key           = null;
+
+                // Fetch existing link or auto-create one if needed.
+                if ( isset( $user_contacts_record[ $meta_key ] ) ) {
+                    $rsc_ml_key = $user_contacts_record[ $meta_key ] ?? null;
+
+                } else if ( ! empty( $meta_key ) ) {
+
+                    // $rsc_ml_key = dt_create_unique_key();
+                    // update_user_option( 6, $meta_key, $rsc_ml_key );
+                }
+
+                // Build link url accordingly.
+                $rsc_ml_url = isset( $rsc_ml_key ) ? esc_url( site_url() . '/' . $rsc_app['root'] . '/' . $rsc_app['type'] . '/' . $rsc_ml_key ) : null;
+                */
                 ?>
 
                 <div class="cell small-12 medium-4">
@@ -178,7 +219,7 @@ class Disciple_Tools_Survey_Collection_Tile {
                     <?php if ( isset( $rsc_ml_url ) ) { ?>
                         <a class="button select-button" style="min-width: 100%;"
                            href="<?php echo esc_attr( $rsc_ml_url ) ?>" target="_blank">
-                            <?php echo esc_attr( __( 'View All Reports', 'disciple-tools-survey-collection' ) ) ?>
+                            <?php echo esc_attr( __( 'Open Survey Forms', 'disciple-tools-survey-collection' ) ) ?>
                         </a>
                     <?php } ?>
                 </div>

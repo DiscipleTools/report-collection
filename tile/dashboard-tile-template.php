@@ -2,6 +2,7 @@
     <?php echo esc_html( $tile->label ) ?>
     <div style="display: inline-block" class="stats-spinner loading-spinner"></div>
 </div>
+<div class="tile-subheader"><?php esc_html_e( 'All Time', 'disciple-tools-survey-collection' ) ?></div>
 <div class="tile-body tile-body--center">
     <div>
         <p style="text-align: center; display: none" id="empty_survey_collection_stats">
@@ -17,27 +18,27 @@
         $stats          = [
             [
                 'key'   => 'stats_new_baptisms_all_time',
-                'label' => __( 'Total Assigned New Baptisms', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total New Baptisms', 'disciple-tools-survey-collection' )
             ],
             [
                 'key'   => 'stats_new_groups_all_time',
-                'label' => __( 'Total Assigned New Groups', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total New Groups', 'disciple-tools-survey-collection' )
             ],
             [
                 'key'   => 'stats_shares_all_time',
-                'label' => __( 'Total Assigned Shares', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Shares', 'disciple-tools-survey-collection' )
             ],
             [
                 'key'   => 'stats_prayers_all_time',
-                'label' => __( 'Total Assigned Prayers', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Prayers', 'disciple-tools-survey-collection' )
             ],
             [
                 'key'   => 'stats_invites_all_time',
-                'label' => __( 'Total Assigned Invites', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Invites', 'disciple-tools-survey-collection' )
             ],
             [
                 'key'   => 'stats_active_groups',
-                'label' => __( 'Current Assigned Active Groups', 'disciple-tools-survey-collection' )
+                'label' => __( 'Current Active Groups', 'disciple-tools-survey-collection' )
             ]
         ];
 
@@ -53,6 +54,11 @@
 
         do_action( 'survey_collection_metrics_dashboard_stats_html', $packaged_stats );
         ?>
+
+        <br><br>
+        <a href="<?php echo esc_url( site_url() . '/metrics/disciple-tools-survey-collection-metrics/report_stats' ) ?>"
+           class="button select-button"
+           style="min-width: 100%;"><?php esc_html_e( 'See Global Dashboard', 'disciple-tools-survey-collection' ) ?></a>
 
     </div>
 </div>

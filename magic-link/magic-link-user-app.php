@@ -9,8 +9,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
     public $page_title = 'Report Survey Collection';
     public $page_description = 'Report Survey Collection';
-    public $root = 'rsc_magic_app'; // @todo define the root of the url {yoursite}/root/type/key/action
-    public $type = 'rsc_user_app'; // @todo define the type
+    public $root = 'report-survey'; // @todo define the root of the url {yoursite}/root/type/key/action
+    public $type = 'my'; // @todo define the type
     public $post_type = 'user';
     private $meta_key = '';
     public $show_bulk_send = false;
@@ -327,12 +327,16 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
              */
 
             window.generate_field_tr_html = (id, type, html, last) => {
-                return `<tr>
-                            <td style="width: 5%;">
-                                <button class="button select-button" onclick="display_report_field_help('${window.lodash.escape(id)}')">
-                                    <i class="mdi mdi-help"></i>
-                                </button>
-                            </td>
+                let tr_html = `<tr>
+                            <td style="width: 2%;">`;
+
+                if (jsObject.reports_field_settings[id]['description']) {
+                    tr_html += `<button class="help-button-tile" onclick="display_report_field_help('${window.lodash.escape(id)}')">
+                                    <i class="mdi mdi-help-circle help-icon"></i>
+                                </button>`;
+                }
+
+                tr_html += `</td>
                             <td>
                                 <input id="form_content_table_field_id" type="hidden" value="${window.lodash.escape(id)}" />
                                 <input id="form_content_table_field_type" type="hidden" value="${window.lodash.escape(type)}" />
@@ -343,6 +347,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                 ${window.lodash.escape(window.extract_last_value(last, id, type))}
                             </td>
                         </tr>`;
+
+                return tr_html;
+
             };
             window.extract_last_value = (last, field_id, field_type) => {
                 if (last && last[field_id]) {
@@ -354,7 +361,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             return last[field_id];
                         }
                         case 'date': {
-                            return last[field_id]['formatted'];
+                            return moment.unix(last[field_id]['timestamp']).format('MMMM DD, YYYY');
                         }
                     }
                 }
@@ -803,15 +810,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             };
 
                             // Adjust start date based on post's date timestamp; if present
+                            let default_state_clear = false;
                             if (post && post[field_id] && post[field_id]['timestamp']) {
                                 let start_ts = post[field_id]['timestamp'];
                                 date_config['startDate'] = moment.unix(start_ts);
                                 field_meta.val(start_ts);
 
                             } else {
-
-                                // Default to current timestamp
-                                field_meta.val(moment().unix());
+                                default_state_clear = true
                             }
 
                             // Initialise date range picker and respond to selections
@@ -825,6 +831,10 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                              * Clear Date
                              */
 
+                            if (default_state_clear) {
+                                jQuery(tr).find('#' + field_id).val('');
+                                field_meta.val('');
+                            }
                             jQuery(tr).find('.clear-date-button').on('click', evt => {
                                 let input_id = jQuery(evt.currentTarget).data('inputid');
 
@@ -1211,7 +1221,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     <table style="display: none;" class="form-content-table">
                         <thead>
                         <tr>
-                            <th style="width: 5%;"></th>
+                            <th style="width: 2%;"></th>
                             <th></th>
                             <th><?php esc_html_e( 'Last Report', 'disciple-tools-survey-collection' ) ?></th>
                         </tr>
@@ -1219,6 +1229,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                         <tbody></tbody>
                     </table>
                     <div id="form_content_comments_div" style="display: none; min-width: 100%;">
+                        <br>
+                        <h3><?php esc_html_e( 'Report Notes', 'disciple-tools-survey-collection' ) ?></h3>
                         <textarea id="form_content_current_comments"
                                   placeholder="<?php esc_html_e( 'Report Comments', 'disciple-tools-survey-collection' ) ?>"></textarea><br>
 

@@ -75,7 +75,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             DT_Dashboard_Plugin_Tiles::instance()->register(
                 new Disciple_Tools_Survey_Collection_Dashboard_Tile(
                     'dt_survey_collection_dashboard_tile',
-                    __( 'Survey Collection Statistics', 'disciple-tools-survey-collection' ),
+                    __( 'My Report Statistics', 'disciple-tools-survey-collection' ),
                     [
                         'priority' => 1,
                         'span'     => 2
@@ -406,8 +406,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     public function dt_after_get_post_fields_filter( $fields, $post_type ) {
         if ( $post_type === $this->post_type ) {
 
+            // Determine correct user id to be used.
+            $user_id = get_current_user_id();
+            if ( isset( $fields['assigned_to'] ) && $fields['assigned_to']['type'] == 'user' ) {
+                $user_id = $fields['assigned_to']['id'];
+            }
+
             // Calculate collective report record statistics.
-            $statistics = self::calculate_statistics( $fields, $post_type, get_current_user_id() );
+            $statistics = self::calculate_statistics( $fields, $post_type, $user_id );
 
             // Package and return calculated statistics.
             return self::package_calculated_statistics( $fields, $statistics );

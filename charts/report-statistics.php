@@ -15,7 +15,7 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
     public $slug = 'report_stats'; // lowercase
     public $js_object_name = 'wp_js_object'; // This object will be loaded into the metrics.js file by the wp_localize_script.
     public $js_file_name = 'report-statistics.js'; // should be full file name plus extension
-    public $permissions = [ 'dt_all_access_contacts', 'view_project_metrics' ];
+    public $permissions = [ 'dt_all_access_contacts', 'view_project_metrics', 'access_reports' ];
 
     public function __construct() {
         parent::__construct();
