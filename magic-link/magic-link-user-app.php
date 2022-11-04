@@ -1510,7 +1510,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                     // Ensure post name is also set to submission date
                     if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) ) {
-                        $updates['name'] = date( 'F j, Y', $field['value'] );
+                        $updates['name'] = gmdate( 'F j, Y', $field['value'] );
                     }
                     break;
 
