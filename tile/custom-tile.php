@@ -169,26 +169,25 @@ class Disciple_Tools_Survey_Collection_Tile {
                 $statistics = apply_filters( 'survey_collection_metrics_user_stats', [], $corresponds_to_user );
 
                 // Fetch corresponding magic link, currently assigned to user.
-                // TODO: Corresponding link_obj_id required in order to correctly generate link! Operating at user level and not post!
-                /*$user_contacts_record = DT_Posts::get_post( $post_type, get_the_ID() );
-                $magic_link_apps      = dt_get_registered_types();
-                $rsc_app              = $magic_link_apps['report-survey']['my'] ?? null;
-                $meta_key             = $rsc_app['meta_key'];
-                $rsc_ml_key           = null;
+                $magic_link_apps = dt_get_registered_types();
+                $rsc_app         = $magic_link_apps['report-survey']['my'] ?? null;
+                $meta_key        = $rsc_app['meta_key'];
+                $rsc_ml_key      = get_user_option( $meta_key, $corresponds_to_user );
+                $has_rsc_ml_key  = false;
 
                 // Fetch existing link or auto-create one if needed.
-                if ( isset( $user_contacts_record[ $meta_key ] ) ) {
-                    $rsc_ml_key = $user_contacts_record[ $meta_key ] ?? null;
+                if ( ! empty( $rsc_ml_key ) ) {
+                    $has_rsc_ml_key = true;
 
                 } else if ( ! empty( $meta_key ) ) {
-
-                    // $rsc_ml_key = dt_create_unique_key();
-                    // update_user_option( 6, $meta_key, $rsc_ml_key );
+                    $rsc_ml_key = dt_create_unique_key();
+                    update_user_option( $corresponds_to_user, $meta_key, $rsc_ml_key );
+                    $has_rsc_ml_key = true;
                 }
 
                 // Build link url accordingly.
-                $rsc_ml_url = isset( $rsc_ml_key ) ? esc_url( site_url() . '/' . $rsc_app['root'] . '/' . $rsc_app['type'] . '/' . $rsc_ml_key ) : null;
-                */
+                $rsc_ml_url = ( $has_rsc_ml_key ) ? esc_url( site_url() . '/' . $rsc_app['root'] . '/' . $rsc_app['type'] . '/' . $rsc_ml_key . '?id=&type=wp_user' ) : null;
+
                 ?>
 
                 <div class="cell small-12 medium-4">

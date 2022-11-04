@@ -261,6 +261,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 'submit_success_function' => Disciple_Tools_Bulk_Magic_Link_Sender_API::get_link_submission_success_js_code()
             ] ) ?>][0];
 
+            console.log(jsObject);
+
             /**
              * Fetch assigned reports
              */
@@ -803,7 +805,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                             let date_config = {
                                 singleDatePicker: true,
-                                timePicker: true,
+                                timePicker: false,
                                 locale: {
                                     format: 'MMMM D, YYYY'
                                 }
@@ -823,6 +825,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             // Initialise date range picker and respond to selections
                             jQuery(tr).find('#' + field_id).daterangepicker(date_config, function (start, end, label) {
                                 if (start) {
+                                    start.hour(6);
                                     field_meta.val(start.unix());
                                 }
                             });
@@ -1507,10 +1510,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                     // Ensure post name is also set to submission date
                     if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) ) {
-                        $dt = new DateTime();
-                        $dt->setTimezone( new DateTimeZone( 'UTC' ) );
-                        $dt->setTimestamp( $field['value'] );
-                        $updates['name'] = $dt->format( 'F j, Y' );
+                        $updates['name'] = date( 'F j, Y', $field['value'] );
                     }
                     break;
 
@@ -1651,9 +1651,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 ];
             }
 
-            // By default, assign to user and default to now as submission date
+            // By default, assign to user.
             $updates['assigned_to'] = 'user-' . $params['parts']['post_id'];
-            $updates['submit_date'] = time();
         }
 
         // Update/Create post record accordingly, based on incoming flags.
