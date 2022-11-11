@@ -1,8 +1,9 @@
 <?php
-if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+} // Exit if accessed directly.
 
-class Disciple_Tools_Plugin_Starter_Template_Endpoints
-{
+class Disciple_Tools_Survey_Collection_Endpoints {
     /**
      * @todo Set the permissions your endpoint needs
      * @link https://github.com/DiscipleTools/Documentation/blob/master/theme-core/capabilities.md
@@ -19,13 +20,13 @@ class Disciple_Tools_Plugin_Starter_Template_Endpoints
      */
     //See https://github.com/DiscipleTools/disciple-tools-theme/wiki/Site-to-Site-Link for outside of wordpress authentication
     public function add_api_routes() {
-        $namespace = 'disciple-tools-plugin-starter-template/v1';
+        $namespace = 'disciple-tools-survey-collection/v1';
 
         register_rest_route(
-            $namespace, '/endpoint', [
-                'methods'  => 'GET',
-                'callback' => [ $this, 'endpoint' ],
-                'permission_callback' => function( WP_REST_Request $request ) {
+            $namespace, '/stats', [
+                'methods'             => 'GET',
+                'callback'            => [ $this, 'stats' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
                     return $this->has_permission();
                 },
             ]
@@ -33,31 +34,34 @@ class Disciple_Tools_Plugin_Starter_Template_Endpoints
     }
 
 
-    public function endpoint( WP_REST_Request $request ) {
-
-        // @todo run your function here
-
-        return true;
+    public function stats( WP_REST_Request $request ) {
+        return [];
     }
 
     private static $_instance = null;
+
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
+
         return self::$_instance;
     } // End instance()
+
     public function __construct() {
         add_action( 'rest_api_init', [ $this, 'add_api_routes' ] );
     }
-    public function has_permission(){
+
+    public function has_permission() {
         $pass = false;
-        foreach ( $this->permissions as $permission ){
-            if ( current_user_can( $permission ) ){
+        foreach ( $this->permissions as $permission ) {
+            if ( current_user_can( $permission ) ) {
                 $pass = true;
             }
         }
+
         return $pass;
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Endpoints::instance();
+
+Disciple_Tools_Survey_Collection_Endpoints::instance();

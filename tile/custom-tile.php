@@ -1,17 +1,20 @@
 <?php
-if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+} // Exit if accessed directly.
 
-class Disciple_Tools_Plugin_Starter_Template_Tile
-{
+class Disciple_Tools_Survey_Collection_Tile {
     private static $_instance = null;
-    public static function instance(){
+
+    public static function instance() {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
+
         return self::$_instance;
     } // End instance()
 
-    public function __construct(){
+    public function __construct() {
         add_filter( 'dt_details_additional_tiles', [ $this, 'dt_details_additional_tiles' ], 10, 2 );
         add_filter( 'dt_custom_fields_settings', [ $this, 'dt_custom_fields' ], 1, 2 );
         add_action( 'dt_details_additional_section', [ $this, 'dt_add_section' ], 30, 2 );
@@ -20,269 +23,210 @@ class Disciple_Tools_Plugin_Starter_Template_Tile
     /**
      * This function registers a new tile to a specific post type
      *
-     * @todo Set the post-type to the target post-type (i.e. contacts, groups, trainings, etc.)
-     * @todo Change the tile key and tile label
-     *
      * @param $tiles
      * @param string $post_type
+     *
      * @return mixed
+     * @todo Change the tile key and tile label
+     *
+     * @todo Set the post-type to the target post-type (i.e. contacts, groups, trainings, etc.)
      */
     public function dt_details_additional_tiles( $tiles, $post_type = '' ) {
-        if ( $post_type === 'contacts' || $post_type === 'starter_post_type' ){
-            $tiles['disciple_tools_plugin_starter_template'] = [ 'label' => __( 'Plugin Starter Template', 'disciple-tools-plugin-starter-template' ) ];
-            $tiles['a_beautiful_tile'] = [ 'label' => __( 'A Beautiful Tile', 'disciple-tools-plugin-starter-template' ) ];
+        if ( $post_type === 'reports' ) {
+            $tiles['statistics'] = [ 'label' => __( 'Statistics', 'disciple-tools-survey-collection' ) ];
         }
+
+        if ( $post_type === 'contacts' ) {
+
+            // Determine if user record report stats are to be shown.
+            $corresponds_to_user = get_post_meta( get_the_ID(), 'corresponds_to_user', true );
+            if ( ! empty( $corresponds_to_user ) && ! is_wp_error( $corresponds_to_user ) ) {
+                $tiles['reports'] = [ 'label' => __( 'Reports', 'disciple-tools-survey-collection' ) ];
+            }
+        }
+
         return $tiles;
     }
 
     /**
      * @param array $fields
      * @param string $post_type
+     *
      * @return array
      */
     public function dt_custom_fields( array $fields, string $post_type = '' ) {
-        /**
-         * @todo set the post type
-         */
-        if ( $post_type === 'contacts' || $post_type === 'starter_post_type' ){
-            /**
-             * @todo Add the fields that you want to include in your tile.
-             *
-             * Examples for creating the $fields array
-             * Contacts
-             * @link https://github.com/DiscipleTools/disciple-tools-theme/blob/256c9d8510998e77694a824accb75522c9b6ed06/dt-contacts/base-setup.php#L108
-             *
-             * Groups
-             * @link https://github.com/DiscipleTools/disciple-tools-theme/blob/256c9d8510998e77694a824accb75522c9b6ed06/dt-groups/base-setup.php#L83
-             */
-
-            /**
-             * This is an example of a text field
-             */
-            $fields['disciple_tools_plugin_starter_template_text'] = [
-                'name'        => __( 'Text', 'disciple-tools-plugin-starter-template' ),
-                'description' => _x( 'Text', 'Optional Documentation', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'text',
-                'default'     => '',
-                'tile' => 'disciple_tools_plugin_starter_template',
-                'icon' => get_template_directory_uri() . '/dt-assets/images/edit.svg',
+        if ( $post_type === 'contacts' ) {
+            $fields['rpt_groups_count'] = [
+                'name'         => __( 'Number of groups in country and people group', 'disciple-tools-survey-collection' ),
+                'description'  => __( 'Current count of total number of groups in country and people groups.', 'disciple-tools-survey-collection' ),
+                'type'         => 'number',
+                'default'      => 0,
+                'tile'         => 'reports',
+                'icon'         => get_template_directory_uri() . '/dt-assets/images/groups.svg',
+                'customizable' => false
             ];
-            /**
-             * This is an example of a multiselect field
-             */
-            $fields['disciple_tools_plugin_starter_template_multiselect'] = [
-                'name' => __( 'Multiselect', 'disciple-tools-plugin-starter-template' ),
-                'default' => [
-                    'one' => [ 'label' => __( 'One', 'disciple-tools-plugin-starter-template' ) ],
-                    'two' => [ 'label' => __( 'Two', 'disciple-tools-plugin-starter-template' ) ],
-                    'three' => [ 'label' => __( 'Three', 'disciple-tools-plugin-starter-template' ) ],
-                    'four' => [ 'label' => __( 'Four', 'disciple-tools-plugin-starter-template' ) ],
+            $fields['rpt_movement']     = [
+                'name'          => __( 'Movement Stage', 'disciple-tools-plugin-starter-template' ),
+                'description'   => __( 'Current movement stage.', 'disciple-tools-plugin-starter-template' ),
+                'type'          => 'key_select',
+                'default'       => [
+                    '1',
+                    '1.1',
+                    '1.2',
+                    '1.3',
+                    '1.4',
+                    '1.5',
+                    '1.6',
+                    '1.7',
+                    '1.8',
+                    '1.9',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                    '6',
+                    '7'
                 ],
-                'tile' => 'disciple_tools_plugin_starter_template',
-                'type' => 'multi_select',
-                'hidden' => false,
-                'icon' => get_template_directory_uri() . '/dt-assets/images/edit.svg',
-            ];
-            /**
-             * This is an example of a key select field
-             */
-            $fields['disciple_tools_plugin_starter_template_keyselect'] = [
-                'name' => 'Key Select',
-                'type' => 'key_select',
-                'tile' => 'disciple_tools_plugin_starter_template',
-                'default' => [
-                    'first'   => [
-                        'label' => _x( 'First', 'Key Select Label', 'disciple-tools-plugin-starter-template' ),
-                        'description' => _x( 'First Key Description', 'Training Status field description', 'disciple-tools-plugin-starter-template' ),
-                        'color' => '#ff9800'
-                    ],
-                    'second'   => [
-                        'label' => _x( 'Second', 'Key Select Label', 'disciple-tools-plugin-starter-template' ),
-                        'description' => _x( 'Second Key Description', 'Training Status field description', 'disciple-tools-plugin-starter-template' ),
-                        'color' => '#4CAF50'
-                    ],
-                    'third'   => [
-                        'label' => _x( 'Third', 'Key Select Label', 'disciple-tools-plugin-starter-template' ),
-                        'description' => _x( 'Third Key Description', 'Training Status field description', 'disciple-tools-plugin-starter-template' ),
-                        'color' => '#366184'
-                    ],
-                ],
-                'icon' => get_template_directory_uri() . '/dt-assets/images/edit.svg',
+                'tile'          => 'reports',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/stream.svg',
                 'default_color' => '#366184',
-                'select_cannot_be_empty' => true
-            ];
-
-            //test fields
-            $fields['number_test'] = [
-                'name'        => __( 'Number field', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'number',
-                'default'     => 0,
-                'tile'        => 'a_beautiful_tile',
-                'min_option'  => '5',
-            ];
-            $fields['number_test_private'] = [
-                'name'        => __( 'Number field private', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'number',
-                'default'     => 0,
-                'tile'        => 'a_beautiful_tile',
-                'private'     => true,
-                'max_option'  => '200',
-            ];
-            $fields['text_test'] = [
-                'name'        => __( 'Text', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'text',
-                'default'     => 0,
-                'tile'      => 'a_beautiful_tile',
-            ];
-            $fields['text_test_private'] = [
-                'name'        => __( 'Text', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'text',
-                'default'     => 0,
-                'tile'      => 'a_beautiful_tile',
-                'private'   => true
-            ];
-            $fields['contact_communication_channel_test'] = [
-                'name'        => __( 'Communication Channel', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'communication_channel',
-                'default'     => 0,
-                'tile'      => 'a_beautiful_tile',
-            ];
-
-            $fields['user_select_test'] = [
-                'name'        => __( 'User Select', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'user_select',
-                'tile'        => 'a_beautiful_tile'
-            ];
-            $fields['array_test'] = [
-                'name'        => __( 'Array', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'array',
-                'tile'        => 'a_beautiful_tile'
-            ];
-            $fields['location_test'] = [
-                'name' => 'location field',
-                'type' => 'location',
-                'tile' => 'a_beautiful_tile'
-            ];
-            $fields['date_test'] = [
-                'name'        => __( ' Date Field', 'disciple-tools-plugin-starter-template' ),
-                'description' => '',
-                'type'        => 'date',
-                'default'     => '',
-                'tile' => 'a_beautiful_tile'
-            ];
-            $fields['date_test_private'] = [
-                'name'        => __( ' Date Field', 'disciple-tools-plugin-starter-template' ),
-                'description' => '',
-                'type'        => 'date',
-                'default'     => '',
-                'tile' => 'a_beautiful_tile',
-                'private'   => true
-            ];
-            $fields['boolean_test'] = [
-                'name'        => __( 'Boolean', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'boolean',
-                'default'     => false,
-            ];
-            $fields['boolean_test_private'] = [
-                'name'        => __( 'Boolean', 'disciple-tools-plugin-starter-template' ),
-                'type'        => 'boolean',
-                'default'     => false,
-                'private'   => true
-            ];
-            $fields['multi_select_test'] = [
-                'name' => 'Random Options',
-                'type' => 'multi_select',
-                'default' => [
-                    'one' => [ 'label' => 'option 1' ],
-                    'two' => [ 'label' => 'option 2' ],
-                    'three' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-            ];
-            $fields['multi_select_test_private'] = [
-                'name' => 'Random Options',
-                'type' => 'multi_select',
-                'default' => [
-                    'one_private' => [ 'label' => 'option 1' ],
-                    'two_private' => [ 'label' => 'option 2' ],
-                    'three_private' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-                'private'   => true
-            ];
-            $fields['key_select_test'] = [
-                'name' => 'Random Options',
-                'type' => 'key_select',
-                'default' => [
-                    'one' => [ 'label' => 'option 1' ],
-                    'two' => [ 'label' => 'option 2' ],
-                    'three' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-            ];
-            $fields['key_select_test_private'] = [
-                'name' => 'Random Options',
-                'type' => 'key_select',
-                'default' => [
-                    'one_private' => [ 'label' => 'option 1' ],
-                    'two_private' => [ 'label' => 'option 2' ],
-                    'three_private' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-                'private'   => true
-            ];
-            $fields['tags_test'] = [
-                'name' => 'Random Tags',
-                'type' => 'tags',
-                'default' => [
-                    'one' => [ 'label' => 'option 1' ],
-                    'two' => [ 'label' => 'option 2' ],
-                    'three' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-            ];
-            $fields['tags_test_private'] = [
-                'name' => 'Random Tags Private',
-                'type' => 'tags',
-                'default' => [
-                    'one' => [ 'label' => 'option 1' ],
-                    'two' => [ 'label' => 'option 2' ],
-                    'three' => [ 'label' => 'option 3' ],
-                ],
-                'tile' => 'a_beautiful_tile',
-                'private'   => true
             ];
         }
+
         return $fields;
     }
 
     public function dt_add_section( $section, $post_type ) {
-        /**
-         * @todo set the post type and the section key that you created in the dt_details_additional_tiles() function
-         */
-        if ( ( $post_type === 'contacts' || $post_type === 'starter_post_type' ) && $section === 'disciple_tools_plugin_starter_template' ){
-            /**
-             * These are two sets of key data:
-             * $this_post is the details for this specific post
-             * $post_type_fields is the list of the default fields for the post type
-             *
-             * You can pull any query data into this section and display it.
-             */
-            $this_post = DT_Posts::get_post( $post_type, get_the_ID() );
-            $post_type_fields = DT_Posts::get_post_field_settings( $post_type );
+        $stats_fields = [
+            [
+                'label'    => __( 'New Baptisms', 'disciple-tools-survey-collection' ),
+                'ytd'      => 'stats_new_baptisms_ytd',
+                'all_time' => 'stats_new_baptisms_all_time'
+            ],
+            [
+                'label'    => __( 'New Groups', 'disciple-tools-survey-collection' ),
+                'ytd'      => 'stats_new_groups_ytd',
+                'all_time' => 'stats_new_groups_all_time'
+            ],
+            [
+                'label'    => __( 'Shares', 'disciple-tools-survey-collection' ),
+                'ytd'      => 'stats_shares_ytd',
+                'all_time' => 'stats_shares_all_time'
+            ],
+            [
+                'label'    => __( 'Prayers', 'disciple-tools-survey-collection' ),
+                'ytd'      => 'stats_prayers_ytd',
+                'all_time' => 'stats_prayers_all_time'
+            ],
+            [
+                'label'    => __( 'Invites', 'disciple-tools-survey-collection' ),
+                'ytd'      => 'stats_invites_ytd',
+                'all_time' => 'stats_invites_all_time'
+            ]
+        ];
+        if ( ( $post_type === 'reports' ) && $section === 'statistics' ) {
+            $post = DT_Posts::get_post( $post_type, get_the_ID() );
             ?>
 
-            <!--
-            @todo you can add HTML content to this section.
-            -->
-
             <div class="cell small-12 medium-4">
-                <!-- @todo remove this notes section-->
-                <strong>You can do a number of customizations here.</strong><br><br>
-                See post types and field keys and values: <a href="<?php echo esc_html( admin_url( 'admin.php?page=dt_utilities&tab=fields' ) ); ?>" target="_blank">click here</a>
+                <table>
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th><?php echo esc_attr( __( 'YTD', 'disciple-tools-survey-collection' ) ) ?></th>
+                        <th><?php echo esc_attr( __( 'All Time', 'disciple-tools-survey-collection' ) ) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach ( $stats_fields as $stats_field ) {
+                        ?>
+                        <tr>
+                            <td>
+                                <?php echo esc_attr( $stats_field['label'] ); ?>
+                            </td>
+                            <td>
+                                <?php echo esc_attr( $post[ $stats_field['ytd'] ] ?? '--' ); ?>
+                            </td>
+                            <td>
+                                <?php echo esc_attr( $post[ $stats_field['all_time'] ] ?? '--' ); ?>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>
+                </table>
             </div>
 
         <?php }
+
+        if ( ( $post_type === 'contacts' ) && $section === 'reports' ) {
+
+            // Determine if user record report stats are to be shown.
+            $corresponds_to_user = get_post_meta( get_the_ID(), 'corresponds_to_user', true );
+            if ( ! empty( $corresponds_to_user ) && ! is_wp_error( $corresponds_to_user ) ) {
+                $statistics = apply_filters( 'survey_collection_metrics_user_stats', [], $corresponds_to_user );
+
+                // Fetch corresponding magic link, currently assigned to user.
+                $magic_link_apps = dt_get_registered_types();
+                $rsc_app         = $magic_link_apps['report-survey']['my'] ?? null;
+                $meta_key        = $rsc_app['meta_key'];
+                $rsc_ml_key      = get_user_option( $meta_key, $corresponds_to_user );
+                $has_rsc_ml_key  = false;
+
+                // Fetch existing link or auto-create one if needed.
+                if ( ! empty( $rsc_ml_key ) ) {
+                    $has_rsc_ml_key = true;
+
+                } else if ( ! empty( $meta_key ) ) {
+                    $rsc_ml_key = dt_create_unique_key();
+                    update_user_option( $corresponds_to_user, $meta_key, $rsc_ml_key );
+                    $has_rsc_ml_key = true;
+                }
+
+                // Build link url accordingly.
+                $rsc_ml_url = ( $has_rsc_ml_key ) ? esc_url( site_url() . '/' . $rsc_app['root'] . '/' . $rsc_app['type'] . '/' . $rsc_ml_key . '?id=&type=wp_user' ) : null;
+
+                ?>
+
+                <div class="cell small-12 medium-4">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th><?php echo esc_attr( __( 'All Time', 'disciple-tools-survey-collection' ) ) ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach ( $stats_fields as $stats_field ) {
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php echo esc_attr( $stats_field['label'] ); ?>
+                                </td>
+                                <td>
+                                    <?php echo esc_attr( $statistics[ $stats_field['all_time'] ] ?? '--' ); ?>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                    <?php if ( isset( $rsc_ml_url ) ) { ?>
+                        <a class="button select-button" style="min-width: 100%;"
+                           href="<?php echo esc_attr( $rsc_ml_url ) ?>" target="_blank">
+                            <?php echo esc_attr( __( 'Open Survey Forms', 'disciple-tools-survey-collection' ) ) ?>
+                        </a>
+                    <?php } ?>
+                </div>
+
+                <?php
+            }
+        }
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Tile::instance();
+
+Disciple_Tools_Survey_Collection_Tile::instance();
