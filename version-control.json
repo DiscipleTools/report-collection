@@ -1,7 +1,7 @@
 {
   "name": "Disciple.Tools - Survey Collection",
   "version": "0.1",
-  "last_updated": "2021-03",
+  "last_updated": "2022-11",
   "author": "Disciple.Tools",
   "author_homepage": "https://disciple.tools",
   "git_owner": "DiscipleTools",
@@ -23,7 +23,7 @@
   },
   "icon": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-survey-collection/master/documentation/icon.png",
   "sections": {
-    "description": "Kick start your Disciple.Tools plugin project with this template! This plugin is a collection of our best practices and code bases for creating Disciple.Tools plugins. ",
+    "description": "Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.",
     "installation": "(Required) You must have Disciple.Tools Theme installed before using this plugin. Once Disciple.Tools is installed, you can use the normal Plugin system to install the plugin.",
     "changelog": ""
   }
