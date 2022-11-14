@@ -89,7 +89,6 @@ class Disciple_Tools_Survey_Collection_Tile {
                 ],
                 'tile'          => 'reports',
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/stream.svg',
-                'default_color' => '#366184',
             ];
         }
 
