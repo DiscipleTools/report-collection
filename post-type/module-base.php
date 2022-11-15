@@ -482,23 +482,35 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             ];
         }
 
+        // Update logged-in user state as required.
+        $original_user = wp_get_current_user();
+        wp_set_current_user( $current_user_id );
+
+        // Fetch active groups total from the latest report.
+        $active_groups_latest_total = DT_Posts::list_posts( 'reports', [
+            'limit'  => 1,
+            'sort'   => '-submit_date',
+            'fields' => [
+                [
+                    'assigned_to' => [ $current_user_id ]
+                ],
+                'status' => [
+                    'new',
+                    'unassigned',
+                    'assigned',
+                    'active'
+                ]
+            ]
+        ] )['posts'][0]['active_groups'] ?? 0;
+
+        // Revert to original user.
+        if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
+            wp_set_current_user( $original_user->ID );
+        }
+
         // Capture miscellaneous stats.
         $statistics['misc'] = [
-            'active_groups' => DT_Posts::list_posts( 'reports', [
-                    'limit'  => 1,
-                    'sort'   => '-submit_date',
-                    'fields' => [
-                        [
-                            'assigned_to' => [ $current_user_id ]
-                        ],
-                        'status' => [
-                            'new',
-                            'unassigned',
-                            'assigned',
-                            'active'
-                        ]
-                    ]
-            ] )['posts'][0]['active_groups'] ?? 0
+            'active_groups' => $active_groups_latest_total
         ];
 
         return $statistics;

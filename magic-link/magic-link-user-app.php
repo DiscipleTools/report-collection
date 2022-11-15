@@ -1171,13 +1171,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             Function(jsObject.submit_success_function)();
 
                         } else {
-                            jQuery('#error').html(data['message']);
+                            console.log(data);
+                            error.html(data['message']);
                             jQuery('#content_submit_but').prop('disabled', false);
                         }
 
                     }).fail(function (e) {
                         console.log(e);
-                        jQuery('#error').html(e);
+                        error.html(e['responseText']);
                         jQuery('#content_submit_but').prop('disabled', false);
                     });
                 }
@@ -1423,11 +1424,22 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             }
         }
 
-        // Package and return filtered fields.
-        return [
+        // Update logged-in user state as required
+        $original_user = wp_get_current_user();
+        wp_set_current_user( $user_id );
+
+        // Package filtered fields.
+        $response = [
             'fields' => $fields_response,
             'last'   => $this->list_reports( 1, '-submit_date', $user_id ?? 'me' )['posts'][0] ?? null
         ];
+
+        // Revert to original user
+        if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
+            wp_set_current_user( $original_user->ID );
+        }
+
+        return $response;
     }
 
     public function get_post( WP_REST_Request $request ) {
