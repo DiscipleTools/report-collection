@@ -170,8 +170,8 @@ class Disciple_Tools_Survey_Collection_Tile {
                 // Fetch corresponding magic link, currently assigned to user.
                 $magic_link_apps = dt_get_registered_types();
                 $rsc_app         = $magic_link_apps['report-survey']['my'] ?? null;
-                $meta_key        = $rsc_app['meta_key'];
-                $rsc_ml_key      = get_user_option( $meta_key, $corresponds_to_user );
+                $meta_key        = ! empty( $rsc_app ) ? $rsc_app['meta_key'] : null;
+                $rsc_ml_key      = ! empty( $meta_key ) ? get_user_option( $meta_key, $corresponds_to_user ) : null;
                 $has_rsc_ml_key  = false;
 
                 // Fetch existing link or auto-create one if needed.
