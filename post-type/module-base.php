@@ -9,7 +9,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     /**
      * Define post type variables
-     * @todo update these variables with your post_type, module key, and names.
      * @var string
      */
     public $post_type = 'reports';
@@ -42,17 +41,11 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         add_filter( 'dt_custom_fields_settings', [ $this, 'dt_custom_fields_settings' ], 10, 2 );
         add_filter( 'dt_details_additional_tiles', [ $this, 'dt_details_additional_tiles' ], 10, 2 );
         add_action( 'dt_details_additional_section', [ $this, 'dt_details_additional_section' ], 20, 2 );
-        add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
         add_filter( 'dt_get_post_type_settings', [ $this, 'dt_get_post_type_settings' ], 20, 2 );
 
         // hooks
-        add_action( 'post_connection_removed', [ $this, 'post_connection_removed' ], 10, 4 );
-        add_action( 'post_connection_added', [ $this, 'post_connection_added' ], 10, 4 );
-        add_filter( 'dt_post_update_fields', [ $this, 'dt_post_update_fields' ], 10, 3 );
         add_filter( 'dt_post_create_fields', [ $this, 'dt_post_create_fields' ], 10, 2 );
         add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
-        add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 10, 3 );
-        add_action( 'dt_comment_created', [ $this, 'dt_comment_created' ], 10, 4 );
         add_filter( 'survey_collection_metrics_user_stats', [ $this, 'calculate_user_statistics' ], 10, 2 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
         add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
@@ -105,7 +98,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     /**
-     * @todo define the permissions for the roles
      * Documentation
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/roles-permissions.md#rolesd
      */
@@ -142,17 +134,11 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     /**
-     * @todo define fields
      * Documentation
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/fields.md
      */
     public function dt_custom_fields_settings( $fields, $post_type ) {
         if ( $post_type === $this->post_type ) {
-
-            /**
-             * @todo configure status appropriate to your post type
-             * @todo modify strings and add elements to default array
-             */
 
             // Status fields
             $fields['status']      = [
@@ -263,7 +249,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     /**
-     * @todo define tiles
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/field-and-tiles.md
      */
     public function dt_details_additional_tiles( $tiles, $post_type = '' ) {
@@ -275,7 +260,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     /**
-     * @todo define additional section content
      * Documentation
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/field-and-tiles.md#add-custom-content
      */
@@ -295,39 +279,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         <?php }
     }
 
-    /**
-     * action when a post connection is added during create or update
-     * @todo catch field changes and do additional processing
-     *
-     * The next three functions are added, removed, and updated of the same field concept
-     */
-    public function post_connection_added( $post_type, $post_id, $field_key, $value ){
-//        if ( $post_type === $this->post_type ){
-//            if ( $field_key === "members" ){
-//                // @todo change 'members'
-//                // execute your code here, if field key match
-//            }
-//            if ( $field_key === "coaches" ){
-//                // @todo change 'coaches'
-//                // execute your code here, if field key match
-//            }
-//        }
-//        if ( $post_type === "contacts" && $field_key === $this->post_type ){
-//            // execute your code here, if a change is made in contacts and a field key is matched
-//        }
-    }
-
-    //action when a post connection is removed during create or update
-    public function post_connection_removed( $post_type, $post_id, $field_key, $value ){
-//        if ( $post_type === $this->post_type ){
-//            // execute your code here, if connection removed
-//        }
-    }
-
-    //filter when a comment is created
-    public function dt_comment_created( $post_type, $post_id, $comment_id, $type ){
-    }
-
     // filter at the start of post creation
     public function dt_post_create_fields( $fields, $post_type ){
         if ( $post_type === $this->post_type ){
@@ -336,11 +287,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 $fields['status'] = 'active';
             }
         }
-        return $fields;
-    }
-
-    //filter at the start of post update
-    public function dt_post_update_fields( $fields, $post_type, $post_id ) {
         return $fields;
     }
 
@@ -561,19 +507,11 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             ", $start_ts, $end_ts, $post_type );
     }
 
-    //action when a post has been created
-    public function dt_post_created( $post_type, $post_id, $initial_fields ){
-    }
-
     /**
-     * @todo adjust queries to support list counts
      * Documentation
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/list-query.md
      */
     private static function get_my_status(){
-        /**
-         * @todo adjust query to return count for update needed
-         */
         global $wpdb;
         $post_type = self::post_type();
         $current_user = get_current_user_id();
@@ -595,9 +533,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     //list page filters function
     private static function get_all_status_types(){
-        /**
-         * @todo adjust query to return count for update needed
-         */
         global $wpdb;
         if ( current_user_can( 'view_any_'.self::post_type() ) ){
             $results = $wpdb->get_results($wpdb->prepare( "
@@ -627,9 +562,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     //build list page filters
     public static function dt_user_list_filters( $filters, $post_type ){
-        /**
-         * @todo process and build filter lists
-         */
         if ( $post_type === self::post_type() ){
             $fields = DT_Posts::get_post_field_settings( $post_type );
             /**
@@ -742,14 +674,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             }
         }
         return $permissions;
-    }
-
-    // scripts
-    public function scripts(){
-        if ( is_singular( $this->post_type ) && get_the_ID() && DT_Posts::can_view( $this->post_type, get_the_ID() ) ){
-            $test = '';
-            // @todo add enqueue scripts
-        }
     }
 
     private static function get_assigned_users_filters() {

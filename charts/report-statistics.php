@@ -3,10 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 } // Exit if accessed directly.
 
-/**
- * @todo replace all occurrences of the string "template" with a string of your choice
- * @todo also rename in charts-loader.php
- */
 class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Chart_Base {
     public $base_slug = 'disciple-tools-survey-collection-metrics'; // lowercase
     public $base_title = 'Survey Collection Metrics';

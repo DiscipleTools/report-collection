@@ -11,9 +11,9 @@ class Disciple_Tools_Survey_Collection_Magic_Link extends DT_Magic_Url_Base {
     public $parts = false;
     public $page_title = 'Starter - Magic Links - Post Type';
     public $page_description = 'Post Type - Magic Links.';
-    public $root = 'starter_magic_app'; // @todo define the root of the url {yoursite}/root/type/key/action
-    public $type = 'starter_magic_type'; // @todo define the type
-    public $post_type = 'survey_collection'; // @todo set the post type this magic link connects with.
+    public $root = 'starter_magic_app'; // define the root of the url {yoursite}/root/type/key/action
+    public $type = 'starter_magic_type'; // define the type
+    public $post_type = 'survey_collection'; // set the post type this magic link connects with.
     private $meta_key = '';
     public $show_bulk_send = false;
     public $show_app_tile = true; // show this magic link in the Apps tile on the post record
@@ -108,13 +108,11 @@ class Disciple_Tools_Survey_Collection_Magic_Link extends DT_Magic_Url_Base {
     }
 
     public function dt_magic_url_base_allowed_js( $allowed_js ) {
-        // @todo add or remove js files with this filter
         $allowed_js[] = 'magic_link_scripts';
         return $allowed_js;
     }
 
     public function dt_magic_url_base_allowed_css( $allowed_css ) {
-        // @todo add or remove js files with this filter
         $allowed_css[] = 'magic_link_css';
         return $allowed_css;
     }
@@ -264,8 +262,8 @@ class Disciple_Tools_Survey_Collection_Magic_Link extends DT_Magic_Url_Base {
 
         $data = [];
 
-        $data[] = [ 'name' => 'List item' ]; // @todo remove example
-        $data[] = [ 'name' => 'List item' ]; // @todo remove example
+        $data[] = [ 'name' => 'List item' ];
+        $data[] = [ 'name' => 'List item' ];
 
         return $data;
     }

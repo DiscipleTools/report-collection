@@ -27,7 +27,6 @@ class Disciple_Tools_Survey_Collection_Site_Links {
         if ( $this->type === $args['connection_type'] ) {
             $args['capabilities'][] = 'create_' . $this->type;
             $args['capabilities'][] = 'update_any_' . $this->type;
-            // @todo add other capabilities here
         }
         return $args;
     }

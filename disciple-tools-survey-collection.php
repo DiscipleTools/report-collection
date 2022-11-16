@@ -18,14 +18,6 @@
  *          https://www.gnu.org/licenses/gpl-2.0.html
  */
 
-/**
- * Refactoring (renaming) this plugin as your own:
- * 1. @todo Rename the `disciple-tools-survey-collection.php file.
- * 2. @todo Refactor all occurrences of the name Disciple_Tools_Survey_Collection, disciple_tools_survey_collection, disciple-tools-survey-collection, survey_collection, and "Survey Collection"
- * 3. @todo Update the README.md and LICENSE
- * 4. @todo Update the default.pot file if you intend to make your plugin multilingual. Use a tool like POEdit
- */
-
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
@@ -96,36 +88,24 @@ class Disciple_Tools_Survey_Collection {
     private function __construct() {
         $is_rest = dt_is_rest();
         /**
-         * @todo Decide if you want to use the REST API example
-         * To remove: delete this following line and remove the folder named /rest-api
-         */
-        if ( $is_rest && strpos( dt_get_url_path(), 'disciple-tools-survey-collection' ) !== false ) {
-            require_once( 'rest-api/rest-api.php' ); // adds starter rest api class
-        }
-
-        /**
-         * @todo Decide if you want to create a new post type
-         * To remove: delete the line below and remove the folder named /post-type
+         * Create a new post type
          */
         require_once( 'post-type/loader.php' ); // add starter post type extension to Disciple.Tools system
 
         /**
-         * @todo Decide if you want to create a custom site-to-site link
-         * To remove: delete the line below and remove the folder named /site-link
+         * Create a custom site-to-site link
          */
         require_once( 'site-link/custom-site-to-site-links.php' ); // add site to site link class and capabilities
 
         /**
-         * @todo Decide if you want to add new charts to the metrics section
-         * To remove: delete the line below and remove the folder named /charts
+         * Add new charts to the metrics section
          */
         if ( strpos( dt_get_url_path(), 'metrics' ) !== false || ( $is_rest && strpos( dt_get_url_path(), 'disciple-tools-survey-collection-metrics' ) !== false ) ){
             require_once( 'charts/charts-loader.php' );  // add custom charts to the metrics area
         }
 
         /**
-         * @todo Decide if you want to add a custom tile or settings page tile
-         * To remove: delete the lines below and remove the folder named /tile
+         * Add a custom tile or settings page tile
          */
         require_once( 'tile/custom-tile.php' ); // add custom tile
         require_once( 'tile/dashboard-tile.php' ); // add dashboard tile
@@ -134,8 +114,7 @@ class Disciple_Tools_Survey_Collection {
         }
 
         /**
-         * @todo Decide if you want to create a magic link
-         * To remove: delete the line below and remove the folder named /magic-link
+         * Create a magic link
          */
         require_once( 'magic-link/post-type-magic-link/magic-link-post-type.php' );
         require_once( 'magic-link/magic-link-user-app.php' );
@@ -143,33 +122,28 @@ class Disciple_Tools_Survey_Collection {
         require_once( 'magic-link/magic-link-map.php' );
 
         /**
-         * @todo Decide if you want to add a custom admin page in the admin area
-         * To remove: delete the 3 lines below and remove the folder named /admin
+         * Add a custom admin page in the admin area
          */
         if ( is_admin() ) {
             require_once( 'admin/admin-menu-and-tabs.php' ); // adds starter admin page and section for plugin
         }
 
         /**
-         * @todo Decide if you want to support localization of your plugin
-         * To remove: delete the line below and remove the folder named /languages
+         * Support localization of your plugin
          */
         $this->i18n();
 
         /**
-         * @todo Decide if you want to customize links for your plugin in the plugin admin area
-         * To remove: delete the lines below and remove the function named "plugin_description_links"
+         * Customize links for your plugin in the plugin admin area
          */
         if ( is_admin() ) { // adds links to the plugin description area in the plugin admin list.
             add_filter( 'plugin_row_meta', [ $this, 'plugin_description_links' ], 10, 4 );
         }
 
         /**
-         * @todo Decide if you want to create default workflows
-         * To remove: delete the line below and remove the folder named /workflows
+         * Versioning System
          */
-        require_once( 'workflows/workflows.php' );
-
+        require_once( 'admin/config-required-plugins.php' );
     }
 
     /**
@@ -180,8 +154,7 @@ class Disciple_Tools_Survey_Collection {
         if ( strpos( $plugin_file_name, basename( __FILE__ ) ) ) {
             // You can still use `array_unshift()` to add links at the beginning.
 
-            $links_array[] = '<a href="https://disciple.tools">Disciple.Tools Community</a>'; // @todo replace with your links.
-            // @todo add other links here
+            $links_array[] = '<a href="https://disciple.tools">Disciple.Tools Community</a>';
         }
 
         return $links_array;
@@ -351,7 +324,7 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
 
 /**
  * Plugin Releases and updates
- * @todo Uncomment and change the url if you want to support remote plugin updating with new versions of your plugin
+ *
  * To remove: delete the section of code below and delete the file called version-control.json in the plugin root
  *
  * This section runs the remote plugin updating service, so you can issue distributed updates to your plugin
@@ -359,9 +332,6 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
  * @note See the instructions for version updating to understand the steps involved.
  * @link https://github.com/DiscipleTools/disciple-tools-survey-collection/wiki/Configuring-Remote-Updating-System
  *
- * @todo Enable this section with your own hosted file
- * @todo An example of this file can be found in (version-control.json)
- * @todo Github is a good option for delivering static json.
  */
 /**
  * Check for plugin updates even when the active theme is not Disciple.Tools

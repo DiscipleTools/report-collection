@@ -13,11 +13,6 @@ if ( ! class_exists( 'DT_Module_Base' ) ) {
  * Add any modules required or added for the post type
  */
 add_filter( 'dt_post_type_modules', function( $modules ){
-
-    /**
-     * @todo Update the starter in the array below 'starter_base'. Follow the pattern.
-     * @todo Add more modules by adding a new array element. i.e. 'starter_base_two'.
-     */
     $modules['reports_base'] = [
         'name' => __( 'Reports', 'disciple-tools-survey-collection' ),
         'enabled' => true,
@@ -32,7 +27,3 @@ add_filter( 'dt_post_type_modules', function( $modules ){
 
 require_once 'module-base.php';
 Disciple_Tools_Survey_Collection_Base::instance();
-
-/**
- * @todo require_once and load additional modules
- */

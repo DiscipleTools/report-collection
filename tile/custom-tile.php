@@ -27,9 +27,7 @@ class Disciple_Tools_Survey_Collection_Tile {
      * @param string $post_type
      *
      * @return mixed
-     * @todo Change the tile key and tile label
      *
-     * @todo Set the post-type to the target post-type (i.e. contacts, groups, trainings, etc.)
      */
     public function dt_details_additional_tiles( $tiles, $post_type = '' ) {
         if ( $post_type === 'reports' ) {
