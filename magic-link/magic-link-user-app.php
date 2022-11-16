@@ -29,6 +29,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
     public function __construct() {
 
         /**
+         * Ensure required magic link api is present.
+         */
+
+        if ( ! class_exists( 'Disciple_Tools_Bulk_Magic_Link_Sender_API' ) ) {
+            return;
+        }
+
+        /**
          * Specify metadata structure, specific to the processing of current
          * magic link type.
          *
@@ -823,10 +831,21 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             }
 
                             // Initialise date range picker and respond to selections
-                            jQuery(tr).find('#' + field_id).daterangepicker(date_config, function (start, end, label) {
+                            let date_field = jQuery(tr).find('#' + field_id);
+                            date_field.daterangepicker(date_config, function (start, end, label) {
                                 if (start) {
                                     start.hour(6);
                                     field_meta.val(start.unix());
+                                }
+                            });
+                            date_field.on('cancel.daterangepicker', function (ev, picker) {
+                                date_field.val('');
+                                field_meta.val('');
+                            });
+                            date_field.on('apply.daterangepicker', function (ev, picker) {
+                                if (picker.startDate) {
+                                    picker.startDate.hour(6);
+                                    field_meta.val(picker.startDate.unix());
                                 }
                             });
 
@@ -1152,13 +1171,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             Function(jsObject.submit_success_function)();
 
                         } else {
-                            jQuery('#error').html(data['message']);
+                            console.log(data);
+                            error.html(data['message']);
                             jQuery('#content_submit_but').prop('disabled', false);
                         }
 
                     }).fail(function (e) {
                         console.log(e);
-                        jQuery('#error').html(e);
+                        error.html(e['responseText']);
                         jQuery('#content_submit_but').prop('disabled', false);
                     });
                 }
@@ -1334,7 +1354,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             wp_set_current_user( $user_id );
 
             // Fetch all assigned posts
-            $posts = $this->list_reports( $params['limit'] ?? 5, '-submit_date' );
+            $posts = $this->list_reports( $params['limit'] ?? 5, '-submit_date', 'me' );
 
             // Revert to original user
             if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
@@ -1356,13 +1376,13 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         return $data;
     }
 
-    private function list_reports( $limit, $sort ): array {
+    private function list_reports( $limit, $sort, $assigned_to ): array {
         return DT_Posts::list_posts( 'reports', [
             'limit'  => $limit,
             'sort'   => $sort,
             'fields' => [
                 [
-                    'assigned_to' => [ 'me' ]
+                    'assigned_to' => [ $assigned_to ]
                 ],
                 'status' => [
                     'new',
@@ -1385,6 +1405,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         $field_settings  = DT_Posts::get_post_field_settings( 'reports', false );
         $link_obj        = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
         $fields_response = [];
+        $user_id         = $params['parts']['post_id'];
+
         foreach ( $fields as $field ) {
             if ( self::is_field_enabled( $link_obj, $field['id'] ) ) {
 
@@ -1402,11 +1424,22 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             }
         }
 
-        // Package and return filtered fields.
-        return [
+        // Update logged-in user state as required
+        $original_user = wp_get_current_user();
+        wp_set_current_user( $user_id );
+
+        // Package filtered fields.
+        $response = [
             'fields' => $fields_response,
-            'last'   => $this->list_reports( 1, '-submit_date' )['posts'][0] ?? null
+            'last'   => $this->list_reports( 1, '-submit_date', $user_id ?? 'me' )['posts'][0] ?? null
         ];
+
+        // Revert to original user
+        if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
+            wp_set_current_user( $original_user->ID );
+        }
+
+        return $response;
     }
 
     public function get_post( WP_REST_Request $request ) {
@@ -1456,7 +1489,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             $response['post']     = $post;
             $response['fields']   = $fields_response;
             $response['comments'] = DT_Posts::get_post_comments( 'reports', $params['post_id'], false, 'all', [ 'number' => $params['comment_count'] ] );
-            $response['last']     = $this->list_reports( 1, '-submit_date' )['posts'][0] ?? null;
+            $response['last']     = $this->list_reports( 1, '-submit_date', $user_id ?? 'me' )['posts'][0] ?? null;
             $response['success']  = true;
 
         } else {
@@ -1509,7 +1542,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     $updates[ $field['id'] ] = $field['value'];
 
                     // Ensure post name is also set to submission date
-                    if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) ) {
+                    if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) && ! empty( $field['value'] ) ) {
                         $updates['name'] = gmdate( 'F j, Y', $field['value'] );
                     }
                     break;
@@ -1658,6 +1691,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         // Update/Create post record accordingly, based on incoming flags.
         $updated_post = ( $params['post_state'] == 'new' ) ? DT_Posts::create_post( 'reports', $updates, false, false ) : DT_Posts::update_post( 'reports', $params['post_id'], $updates, false, false );
         if ( empty( $updated_post ) || is_wp_error( $updated_post ) ) {
+            if ( is_wp_error( $updated_post ) ) {
+                dt_write_log( $updated_post );
+            }
             return [
                 'success' => false,
                 'message' => __( 'Unable to update report record details!', 'disciple_tools' )
@@ -1668,6 +1704,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         if ( isset( $params['comments'] ) && ! empty( $params['comments'] ) ) {
             $updated_comment = DT_Posts::add_post_comment( $updated_post['post_type'], $updated_post['ID'], $params['comments'], 'comment', [], false );
             if ( empty( $updated_comment ) || is_wp_error( $updated_comment ) ) {
+                if ( is_wp_error( $updated_comment ) ) {
+                    dt_write_log( $updated_comment );
+                }
                 return [
                     'success' => false,
                     'message' => 'Unable to add comment to contact record details!'

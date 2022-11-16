@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Disciple.Tools - Survey Collection
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-survey-collection
- * Description: Disciple.Tools - Survey Collection is intended to help developers and integrator jumpstart their extension of the Disciple.Tools system.
+ * Description: Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.
  * Text Domain: disciple-tools-survey-collection
  * Domain Path: /languages
  * Version:  0.1
@@ -141,7 +141,6 @@ class Disciple_Tools_Survey_Collection {
         require_once( 'magic-link/magic-link-user-app.php' );
         require_once( 'magic-link/magic-link-non-object.php' );
         require_once( 'magic-link/magic-link-map.php' );
-//        require_once( 'magic-link/magic-link-home.php' );
 
         /**
          * @todo Decide if you want to add a custom admin page in the admin area
@@ -373,21 +372,21 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
  * Also, see the instructions for version updating to understand the steps involved.
  * @see https://github.com/DiscipleTools/disciple-tools-version-control/wiki/How-to-Update-the-Starter-Plugin
  */
-//add_action( 'plugins_loaded', function (){
-//    if ( is_admin() && !( is_multisite() && class_exists( "DT_Multisite" ) ) || wp_doing_cron() ){
-//        // Check for plugin updates
-//        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-//            if ( file_exists( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' )){
-//                require( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
-//            }
-//        }
-//        if ( class_exists( 'Puc_v4_Factory' ) ){
-//            Puc_v4_Factory::buildUpdateChecker(
-//                'https://raw.githubusercontent.com/DiscipleTools/disciple-tools-survey-collection/master/version-control.json',
-//                __FILE__,
-//                'disciple-tools-survey-collection'
-//            );
-//
-//        }
-//    }
-//} );
+add_action( 'plugins_loaded', function (){
+    if ( is_admin() && ! ( is_multisite() && class_exists( 'DT_Multisite' ) ) || wp_doing_cron() ) {
+        // Check for plugin updates
+        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+            if ( file_exists( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' ) ) {
+                require( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
+            }
+        }
+        if ( class_exists( 'Puc_v4_Factory' ) ) {
+            Puc_v4_Factory::buildUpdateChecker(
+                'https://raw.githubusercontent.com/DiscipleTools/disciple-tools-survey-collection/master/version-control.json',
+                __FILE__,
+                'disciple-tools-survey-collection'
+            );
+
+        }
+    }
+} );
