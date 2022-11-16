@@ -40,12 +40,6 @@ add_action( 'tgmpa_register', function() {
      */
     $plugins = [
         [
-            'name'     => 'iThemes Security',
-            'slug'     => 'better-wp-security',
-            'required' => false,
-            'version'  => '7.2.0',
-        ],
-        [
             'name'     => 'Disciple Tools - Magic Links',
             'slug'     => 'disciple-tools-bulk-magic-link-sender',
             'required' => true,
@@ -60,14 +54,6 @@ add_action( 'tgmpa_register', function() {
             'source'   => 'https://github.com/DiscipleTools/disciple-tools-dashboard/releases/latest/download/disciple-tools-dashboard.zip'
         ]
     ];
-    if ( is_multisite() ) {
-        $plugins[] = [
-            'name'     => 'Disciple.Tools Multisite Helper',
-            'slug'     => 'disciple-tools-multisite',
-            'source'   => 'https://github.com/DiscipleTools/disciple-tools-multisite/releases/latest/download/disciple-tools-multisite.zip',
-            'required' => false
-        ];
-    }
 
     /*
      * Array of configuration settings. Amend each line as needed.

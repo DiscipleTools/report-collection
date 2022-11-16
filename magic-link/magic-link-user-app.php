@@ -1691,6 +1691,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         // Update/Create post record accordingly, based on incoming flags.
         $updated_post = ( $params['post_state'] == 'new' ) ? DT_Posts::create_post( 'reports', $updates, false, false ) : DT_Posts::update_post( 'reports', $params['post_id'], $updates, false, false );
         if ( empty( $updated_post ) || is_wp_error( $updated_post ) ) {
+            if ( is_wp_error( $updated_post ) ) {
+                dt_write_log( $updated_post );
+            }
             return [
                 'success' => false,
                 'message' => __( 'Unable to update report record details!', 'disciple_tools' )
@@ -1701,6 +1704,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         if ( isset( $params['comments'] ) && ! empty( $params['comments'] ) ) {
             $updated_comment = DT_Posts::add_post_comment( $updated_post['post_type'], $updated_post['ID'], $params['comments'], 'comment', [], false );
             if ( empty( $updated_comment ) || is_wp_error( $updated_comment ) ) {
+                if ( is_wp_error( $updated_comment ) ) {
+                    dt_write_log( $updated_comment );
+                }
                 return [
                     'success' => false,
                     'message' => 'Unable to add comment to contact record details!'
