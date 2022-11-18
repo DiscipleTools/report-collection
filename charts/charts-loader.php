@@ -16,10 +16,6 @@ class Disciple_Tools_Survey_Collection_Charts
         require_once( 'report-statistics.php' );
         new Disciple_Tools_Survey_Collection_Report_Statistics();
 
-        /**
-         * @todo add other charts like the pattern above here
-         */
-
     } // End __construct
 }
 Disciple_Tools_Survey_Collection_Charts::instance();

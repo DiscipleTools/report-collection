@@ -9,8 +9,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
     public $page_title = 'Report Survey Collection';
     public $page_description = 'Report Survey Collection';
-    public $root = 'report-survey'; // @todo define the root of the url {yoursite}/root/type/key/action
-    public $type = 'my'; // @todo define the type
+    public $root = 'report-survey'; // define the root of the url {yoursite}/root/type/key/action
+    public $type = 'my'; // define the type
     public $post_type = 'user';
     private $meta_key = '';
     public $show_bulk_send = false;
@@ -181,7 +181,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
      * Writes custom styles to header
      *
      * @see DT_Magic_Url_Base()->header_style() for default state
-     * @todo remove if not needed
      */
     public function header_style() {
         ?>
@@ -223,7 +222,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
      * Writes javascript to the header
      *
      * @see DT_Magic_Url_Base()->header_javascript() for default state
-     * @todo remove if not needed
      */
     public function header_javascript(){
         ?>
@@ -235,7 +233,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
      * Writes javascript to the footer
      *
      * @see DT_Magic_Url_Base()->footer_javascript() for default state
-     * @todo remove if not needed
      */
     public function footer_javascript(){
         ?>
