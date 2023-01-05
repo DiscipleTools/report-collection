@@ -810,6 +810,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                             let date_config = {
                                 singleDatePicker: true,
+                                autoApply: true,
                                 timePicker: false,
                                 locale: {
                                     format: 'MMMM D, YYYY'
@@ -845,6 +846,11 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                     field_meta.val(picker.startDate.unix());
                                 }
                             });
+                            date_field.on('blur', function (event) {
+                                if ( !field_meta.val() ) {
+                                    date_field.val('')
+                                }
+                            })
 
                             /**
                              * Clear Date
@@ -854,6 +860,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                 jQuery(tr).find('#' + field_id).val('');
                                 field_meta.val('');
                             }
+
                             jQuery(tr).find('.clear-date-button').on('click', evt => {
                                 let input_id = jQuery(evt.currentTarget).data('inputid');
 
@@ -1672,7 +1679,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
         // Specific new report requirements....
         if ( $params['post_state'] == 'new' ) {
-
             // Ensure a valid name field is present
             if ( empty( $updates['name'] ) ) {
                 return [
