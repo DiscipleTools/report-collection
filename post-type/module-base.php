@@ -173,17 +173,17 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             ];
 
             // Tracking fields
-            $fields['submit_date']    = [
-                'name'        => __( 'Submission Date', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Report submission date; which forms the basis of all statistical calculations.', 'disciple-tools-survey-collection' ),
+            $fields['rpt_start_date'] = [
+                'name'        => __( 'Report Start Date', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Report start date.', 'disciple-tools-survey-collection' ),
                 'type'        => 'date',
                 'default'     => '',
                 'tile'        => 'tracking',
                 'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
             ];
-            $fields['rpt_start_date'] = [
-                'name'        => __( 'Report Start Date', 'disciple-tools-survey-collection' ),
-                'description' => __( 'Report start date.', 'disciple-tools-survey-collection' ),
+            $fields['submit_date']    = [
+                'name'        => __( 'Submission Date', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Report submission date; which forms the basis of all statistical calculations.', 'disciple-tools-survey-collection' ),
                 'type'        => 'date',
                 'default'     => '',
                 'tile'        => 'tracking',
