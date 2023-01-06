@@ -42,6 +42,33 @@
             ]
         ];
 
+        // Identify any other metric fields.
+        $other_metric_fields = apply_filters( 'survey_collection_identify_other_metric_fields', [], 'reports', [ 'number' ], [ 'tracking' ], [
+            'status',
+            'assigned_to',
+            'submit_date',
+            'rpt_start_date',
+            'shares',
+            'prayers',
+            'invites',
+            'new_baptisms',
+            'new_groups',
+            'active_groups'
+        ] );
+
+        if ( !empty( $other_metric_fields ) ){
+            foreach ( $other_metric_fields as $field_key => $field ){
+                if ( isset( $field['name'] ) ){
+                    $key = 'stats_' . $field_key . '_all_time';
+                    $stats[] = [
+                        'key' => $key,
+                        'label' => sprintf( __( 'Total %s', 'disciple-tools-survey-collection' ), $field['name'] )
+                    ];
+                }
+            }
+        }
+
+        // Package final stats shape and render html display.
         foreach ( $stats as $stat ) {
             if ( isset( $raw_stats[ $stat['key'] ] ) ) {
                 $packaged_stats[] = [
