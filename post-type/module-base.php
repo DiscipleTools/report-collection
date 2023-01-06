@@ -46,6 +46,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         // hooks
         add_filter( 'dt_post_create_fields', [ $this, 'dt_post_create_fields' ], 10, 2 );
         add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
+        add_filter( 'survey_collection_identify_other_metric_fields', [ $this, 'identify_other_metric_fields' ], 10, 5 );
         add_filter( 'survey_collection_metrics_user_stats', [ $this, 'calculate_user_statistics' ], 10, 2 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
         add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
@@ -369,19 +370,15 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     private function package_calculated_statistics( $packaged_stats, $raw_stats ) {
-        if ( isset( $raw_stats['ytd'] ) ) {
-            $packaged_stats['stats_new_baptisms_ytd'] = $raw_stats['ytd']['new_baptisms'];
-            $packaged_stats['stats_new_groups_ytd']   = $raw_stats['ytd']['new_groups'];
-            $packaged_stats['stats_shares_ytd']       = $raw_stats['ytd']['shares'];
-            $packaged_stats['stats_prayers_ytd']      = $raw_stats['ytd']['prayers'];
-            $packaged_stats['stats_invites_ytd']      = $raw_stats['ytd']['invites'];
+        if ( isset( $raw_stats['ytd'] ) ){
+            foreach ( $raw_stats['ytd'] as $key => $stat ){
+                $packaged_stats['stats_' . $key . '_ytd'] = $raw_stats['ytd'][$key];
+            }
         }
-        if ( isset( $raw_stats['all_time'] ) ) {
-            $packaged_stats['stats_new_baptisms_all_time'] = $raw_stats['all_time']['new_baptisms'];
-            $packaged_stats['stats_new_groups_all_time']   = $raw_stats['all_time']['new_groups'];
-            $packaged_stats['stats_shares_all_time']       = $raw_stats['all_time']['shares'];
-            $packaged_stats['stats_prayers_all_time']      = $raw_stats['all_time']['prayers'];
-            $packaged_stats['stats_invites_all_time']      = $raw_stats['all_time']['invites'];
+        if ( isset( $raw_stats['all_time'] ) ){
+            foreach ( $raw_stats['all_time'] as $key => $stat ){
+                $packaged_stats['stats_' . $key . '_all_time'] = $raw_stats['all_time'][$key];
+            }
         }
         if ( $raw_stats['misc'] ) {
             $packaged_stats['stats_active_groups'] = $raw_stats['misc']['active_groups'];
@@ -390,9 +387,38 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         return $packaged_stats;
     }
 
+    public function identify_other_metric_fields( $other_metric_fields, $post_type, $supported_field_types, $supported_field_tiles, $ignored_fields ): array{
+        $field_settings = DT_Posts::get_post_field_settings( $post_type, false );
+        foreach ( $field_settings ?? [] as $field_key => $field ){
+            if ( isset( $field['type'], $field['tile'] ) ){
+                if ( in_array( $field['type'], $supported_field_types ) && in_array( $field['tile'], $supported_field_tiles ) ){
+                    if ( !in_array( $field_key, $ignored_fields ) ){
+                        $other_metric_fields[$field_key] = $field;
+                    }
+                }
+            }
+        }
+
+        return $other_metric_fields;
+    }
+
     private function calculate_statistics( $fields, $post_type, $current_user_id ) {
         global $wpdb;
         $statistics = [];
+
+        // In addition to defaults, identify other metric fields to be captured.
+        $other_metric_fields = self::identify_other_metric_fields( [], $post_type, [ 'number' ], [ 'tracking' ], [
+            'status',
+            'assigned_to',
+            'submit_date',
+            'rpt_start_date',
+            'shares',
+            'prayers',
+            'invites',
+            'new_baptisms',
+            'new_groups',
+            'active_groups'
+        ] );
 
         // Calculate year-to-date (ytd) statistics.
         if ( ! empty( $fields['submit_date'] ) ) {
@@ -409,6 +435,21 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     'prayers'       => $ytd_results[0]['prayers'],
                     'invites'       => $ytd_results[0]['invites']
                 ];
+
+                // Process any other identified field metrics.
+                if ( !empty( $other_metric_fields ) ){
+                    foreach ( $other_metric_fields as $field_key => $field ){
+
+                        // phpcs:disable
+                        $ytd_results_other_metric_fields = $wpdb->get_results( self::calculate_other_metric_fields_statistics_prepare_sql( $wpdb, $current_user_id, $fields['submit_date']['timestamp'], time(), $field_key, $post_type ), ARRAY_A );
+                        // phpcs:enable
+
+                        // Append results to existing stats.
+                        if ( !empty( $ytd_results_other_metric_fields ) ){
+                            $statistics['ytd'][$field_key] = $ytd_results_other_metric_fields[0]['field_metric'];
+                        }
+                    }
+                }
             }
         }
 
@@ -426,6 +467,21 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'prayers'       => $all_time_results[0]['prayers'],
                 'invites'       => $all_time_results[0]['invites']
             ];
+
+            // Process any other identified field metrics.
+            if ( !empty( $other_metric_fields ) ){
+                foreach ( $other_metric_fields as $field_key => $field ){
+
+                    // phpcs:disable
+                    $all_time_results_other_metric_fields = $wpdb->get_results( self::calculate_other_metric_fields_statistics_prepare_sql( $wpdb, $current_user_id, 0, time(), $field_key, $post_type ), ARRAY_A );
+                    // phpcs:enable
+
+                    // Append results to existing stats.
+                    if ( !empty( $all_time_results_other_metric_fields ) ){
+                        $statistics['all_time'][$field_key] = $all_time_results_other_metric_fields[0]['field_metric'];
+                    }
+                }
+            }
         }
 
         // Update logged-in user state as required.
@@ -460,6 +516,18 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         ];
 
         return $statistics;
+    }
+
+    private function calculate_other_metric_fields_statistics_prepare_sql( $wpdb, $user_id, $start_ts, $end_ts, $field_key, $post_type ){
+        return $wpdb->prepare( "
+        SELECT SUM(field_metric) field_metric
+            FROM (SELECT DISTINCT p.ID, (pm_field_metric.meta_value) field_metric
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to' AND pm.meta_value = CONCAT( 'user-', %s ))
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_field_metric ON (p.ID = pm_field_metric.post_id) AND (pm_field_metric.meta_key = %s)
+            WHERE p.post_type = %s) AS user_stats
+            ", $user_id, $start_ts, $end_ts, $field_key, $post_type );
     }
 
     private function calculate_statistics_prepare_sql( $wpdb, $user_id, $start_ts, $end_ts, $post_type ) {

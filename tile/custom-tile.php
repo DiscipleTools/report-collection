@@ -34,14 +34,8 @@ class Disciple_Tools_Survey_Collection_Tile {
             $tiles['statistics'] = [ 'label' => __( 'Statistics', 'disciple-tools-survey-collection' ) ];
         }
 
-        if ( $post_type === 'contacts' ) {
-
-            // Determine if user record report stats are to be shown.
-            $corresponds_to_user = get_post_meta( get_the_ID(), 'corresponds_to_user', true );
-            if ( ! empty( $corresponds_to_user ) && ! is_wp_error( $corresponds_to_user ) ) {
-                $tiles['reports'] = [ 'label' => __( 'Reports', 'disciple-tools-survey-collection' ) ];
-            }
-        }
+        // Register reports tile by default; to be managed via admin custom tiles view.
+        $tiles['reports'] = [ 'label' => __( 'Reports', 'disciple-tools-survey-collection' ) ];
 
         return $tiles;
     }
