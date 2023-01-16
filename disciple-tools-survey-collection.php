@@ -109,9 +109,9 @@ class Disciple_Tools_Survey_Collection {
          */
         require_once( 'tile/custom-tile.php' ); // add custom tile
         require_once( 'tile/dashboard-tile.php' ); // add dashboard tile
-        if ( 'settings' === dt_get_url_path() && ! $is_rest ) {
-            require_once( 'tile/settings-tile.php' ); // add custom settings page tile
-        }
+//        if ( 'settings' === dt_get_url_path() && ! $is_rest ) {
+//            require_once( 'tile/settings-tile.php' ); // add custom settings page tile
+//        }
 
         /**
          * Create a magic link
