@@ -124,9 +124,9 @@ class Disciple_Tools_Survey_Collection {
         /**
          * Add a custom admin page in the admin area
          */
-        if ( is_admin() ) {
-            require_once( 'admin/admin-menu-and-tabs.php' ); // adds starter admin page and section for plugin
-        }
+//        if ( is_admin() ) {
+//            require_once( 'admin/admin-menu-and-tabs.php' ); // adds starter admin page and section for plugin
+//        }
 
         /**
          * Support localization of your plugin
