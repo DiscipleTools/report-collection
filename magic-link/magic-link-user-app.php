@@ -1175,15 +1175,37 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             Function(jsObject.submit_success_function)();
 
                         } else {
-                            console.log(data);
-                            error.html(data['message']);
-                            jQuery('#content_submit_but').prop('disabled', false);
+                            Toastify({
+                                text: data['message'],
+                                close: true,
+                                gravity: "bottom",
+                                position: "center",
+                                duration: 6000,
+                                style: {
+                                    background: "#d25e5e"
+                                },
+                                callback: function() {
+                                    console.log(data);
+                                    jQuery('#content_submit_but').prop('disabled', false);
+                                }
+                            }).showToast();
                         }
 
                     }).fail(function (e) {
-                        console.log(e);
-                        error.html(e['responseText']);
-                        jQuery('#content_submit_but').prop('disabled', false);
+                        Toastify({
+                            text: e['responseText'],
+                            close: true,
+                            gravity: "bottom",
+                            position: "center",
+                            duration: 6000,
+                            style: {
+                                background: "#d25e5e"
+                            },
+                            callback: function() {
+                                console.log(e);
+                                jQuery('#content_submit_but').prop('disabled', false);
+                            }
+                        }).showToast();
                     });
                 }
             });
