@@ -111,7 +111,26 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             }
         }
 
-        return $report_survey_collection_fields;
+        /**
+         * If present, ensure field order mirrors that of tile ordering settings;
+         * with support for multiple tile references.
+         */
+
+        $ordered_fields = [];
+        $tiles = DT_Posts::get_post_tiles( 'reports', false );
+        foreach ( self::get_supported_field_tiles() as $tile ){
+            if ( isset( $tiles[$tile], $tiles[$tile]['order'] ) && !empty( $tiles[$tile]['order'] ) ){
+                foreach ( $tiles[$tile]['order'] as $ordered_field_key ){
+                    foreach ( $report_survey_collection_fields as $collection_fields ){
+                        if ( $collection_fields['id'] == $ordered_field_key ){
+                            $ordered_fields[] = $collection_fields;
+                        }
+                    }
+                }
+            }
+        }
+
+        return empty( $ordered_fields ) ? $report_survey_collection_fields : $ordered_fields;
     }
 
     public function wp_enqueue_scripts() {
