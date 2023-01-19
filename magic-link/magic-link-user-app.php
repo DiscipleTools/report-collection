@@ -282,7 +282,26 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                         'open_modal'      => __( 'Open Modal', 'disciple_tools' )
                     ]
                 ],
-                'submit_success_function' => Disciple_Tools_Bulk_Magic_Link_Sender_API::get_link_submission_success_js_code()
+                'submit_success_function' => Disciple_Tools_Bulk_Magic_Link_Sender_API::get_link_submission_success_js_code(),
+                'validation' => [
+                    'dates' => [
+                        'rpt_start_date' => [
+                            'function' => '
+                                let rpt_start_date = jQuery("#rpt_start_date").parent().parent().find("#form_content_table_field_meta").val();
+                                let submit_date = jQuery("#submit_date").parent().parent().find("#form_content_table_field_meta").val();
+                                return parseInt(submit_date) > parseInt(rpt_start_date);
+                            ',
+                            'notice' => __( 'Start date falls after submission date, is this correct?', 'disciple_tools' )
+                        ],
+                        'submit_date' => [
+                            'function' => '
+                                let submit_date = jQuery("#submit_date").parent().parent().find("#form_content_table_field_meta").val();
+                                return parseInt(moment().unix()) > parseInt(submit_date);
+                            ',
+                            'notice' => __( 'Submission dates set in the future are not included within metric calculations!', 'disciple_tools' )
+                        ]
+                    ]
+                ]
             ] ) ?>][0];
 
             console.log(jsObject);
@@ -863,6 +882,13 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                 if (picker.startDate) {
                                     picker.startDate.hour(6);
                                     field_meta.val(picker.startDate.unix());
+
+                                    // If required, carry out validation checks.
+                                    if (jsObject.validation.dates[field_id]) {
+                                        if (!Function(jsObject.validation.dates[field_id]['function'])()) {
+                                            alert(jsObject.validation.dates[field_id]['notice']);
+                                        }
+                                    }
                                 }
                             });
                             date_field.on('blur', function (event) {

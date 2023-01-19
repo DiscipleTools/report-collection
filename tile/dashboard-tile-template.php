@@ -5,6 +5,7 @@
 <div class="tile-subheader"><?php esc_html_e( 'All Time', 'disciple-tools-survey-collection' ) ?></div>
 <div class="tile-body tile-body--center">
     <div>
+        <p><?php esc_html_e( 'Reports with submission dates set in the future are not included within metric calculations.', 'disciple-tools-survey-collection' ) ?></p>
         <p style="text-align: center; display: none" id="empty_survey_collection_stats">
             <strong><?php esc_html_e( 'No data to show yet. You have no active reports', 'disciple-tools-survey-collection' ) ?></strong>
         </p>
