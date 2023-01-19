@@ -116,10 +116,7 @@ class Disciple_Tools_Survey_Collection {
         /**
          * Create a magic link
          */
-        require_once( 'magic-link/post-type-magic-link/magic-link-post-type.php' );
         require_once( 'magic-link/magic-link-user-app.php' );
-        require_once( 'magic-link/magic-link-non-object.php' );
-        require_once( 'magic-link/magic-link-map.php' );
 
         /**
          * Add a custom admin page in the admin area
