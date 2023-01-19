@@ -1612,9 +1612,14 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 case 'date':
                     $updates[ $field['id'] ] = $field['value'];
 
-                    // Ensure post name is also set to submission date
-                    if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) && ! empty( $field['value'] ) ) {
-                        $updates['name'] = gmdate( 'F j, Y', $field['value'] );
+                    // Ensure post name is also set to submission date.
+                    if ( ( $field['type'] == 'date' ) && ( $field['id'] == 'submit_date' ) ){
+                        $updates['name'] = gmdate( 'F j, Y', !empty( $field['value'] ) ? $field['value'] : time() );
+
+                        // Default to today, if no submission date has been specified.
+                        if ( empty( $field['value'] ) ){
+                            $updates[$field['id']] = time();
+                        }
                     }
                     break;
 
@@ -1750,7 +1755,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             if ( empty( $updates['name'] ) ) {
                 return [
                     'success' => false,
-                    'message' => __( 'Please ensure a valid report name is specified!', 'disciple_tools' )
+                    'message' => __( 'Please ensure a valid Submission Date is specified!', 'disciple_tools' )
                 ];
             }
 
