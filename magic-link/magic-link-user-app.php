@@ -316,7 +316,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     data: {
                         action: 'get',
                         parts: jsObject.parts,
-                        limit: 5
+                        limit: 5,
+                        'no-cache': new Date().getTime()
                     },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
