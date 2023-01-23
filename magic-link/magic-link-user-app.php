@@ -270,7 +270,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     'help'             => [
                         'title'     => __( 'Field Description', 'disciple_tools' ),
                         'close_but' => __( 'Close', 'disciple_tools' )
-                    ]
+                    ],
+                    'update_success' => __( 'Update Successful!', 'disciple_tools' )
                 ],
                 'mapbox'                  => [
                     'map_key'        => DT_Mapbox_API::get_key(),
@@ -283,6 +284,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                     ]
                 ],
                 'submit_success_function' => Disciple_Tools_Bulk_Magic_Link_Sender_API::get_link_submission_success_js_code(),
+                'submit_error_function' => Disciple_Tools_Bulk_Magic_Link_Sender_API::get_link_submission_error_js_code(),
                 'validation' => [
                     'dates' => [
                         'rpt_start_date' => [
@@ -1218,40 +1220,21 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
                         // If successful, refresh page, otherwise; display error message
                         if (data['success']) {
-                            Function(jsObject.submit_success_function)();
-
+                            Function('message', 'success_callback_func', jsObject.submit_success_function)(jsObject.translations.update_success, function () {
+                                window.location.reload();
+                            });
                         } else {
-                            Toastify({
-                                text: data['message'],
-                                close: true,
-                                gravity: "bottom",
-                                position: "center",
-                                duration: 6000,
-                                style: {
-                                    background: "#d25e5e"
-                                },
-                                callback: function() {
-                                    console.log(data);
-                                    jQuery('#content_submit_but').prop('disabled', false);
-                                }
-                            }).showToast();
+                            Function('error', 'error_callback_func', jsObject.submit_error_function)(data['message'], function() {
+                                console.log(data);
+                                jQuery('#content_submit_but').prop('disabled', false);
+                            });
                         }
 
                     }).fail(function (e) {
-                        Toastify({
-                            text: e['responseText'],
-                            close: true,
-                            gravity: "bottom",
-                            position: "center",
-                            duration: 6000,
-                            style: {
-                                background: "#d25e5e"
-                            },
-                            callback: function() {
-                                console.log(e);
-                                jQuery('#content_submit_but').prop('disabled', false);
-                            }
-                        }).showToast();
+                        Function('error', 'error_callback_func', jsObject.submit_error_function)(e['responseJSON']['message'], function() {
+                            console.log(e);
+                            jQuery('#content_submit_but').prop('disabled', false);
+                        });
                     });
                 }
             });
