@@ -333,8 +333,16 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         // phpcs:disable
         $active_groups_global_results = $wpdb->get_results( self::calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
         // phpcs:enable
-        if ( ! empty( $active_groups_global_results ) ) {
-            $stats['stats_active_groups'] = $active_groups_global_results[0]['active_groups'];
+        if ( !empty( $active_groups_global_results ) ){
+            $stats_active_groups = 0;
+            $processed_users = [];
+            foreach ( $active_groups_global_results as $active_stats ){
+                if ( isset( $active_stats['assigned_to'], $active_stats['active_groups'] ) && !in_array( $active_stats['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $active_stats['assigned_to'];
+                    $stats_active_groups += intval( $active_stats['active_groups'] );
+                }
+            }
+            $stats['stats_active_groups'] = $stats_active_groups;
         }
 
         return $stats;
@@ -564,14 +572,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     private function calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
         return $wpdb->prepare( "
-        SELECT SUM(active_groups) active_groups
+        SELECT assigned_to, active_groups
             FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_groups.meta_value) active_groups, (pm_ts.meta_value) submit_date
             FROM $wpdb->posts p
             INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
             INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
             LEFT JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
             WHERE p.post_type = %s
-            ORDER BY pm_ts.meta_value DESC LIMIT 1) AS global_active_groups_stats
+            ORDER BY pm_ts.meta_value DESC) AS global_active_groups_stats
             ", $start_ts, $end_ts, $post_type );
     }
 
