@@ -727,6 +727,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     ],
                     'count' => $total_all
                 ];
+
+                $my_all_total = DT_Posts::list_posts( self::post_type(), [
+                    'fields' => [
+                        [
+                            'assigned_to' => [ 'me' ]
+                        ]
+                    ]
+                ] );
                 $filters['filters'][] = [
                     'ID'    => 'my_all',
                     'tab'   => 'all',
@@ -735,7 +743,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                         'assigned_to' => [ 'me' ],
                         'sort'        => 'status'
                     ],
-                    'count' => $total_all,
+                    'count' => $my_all_total['total'],
                 ];
 
                 foreach ( $fields['status']['default'] as $status_key => $status_value ) {
