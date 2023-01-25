@@ -345,6 +345,22 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             $stats['stats_active_groups'] = $stats_active_groups;
         }
 
+        // Capture participants global statistics.
+        // phpcs:disable
+        $participants_global_results = $wpdb->get_results( self::calculate_global_participants_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
+        if ( !empty( $participants_global_results ) ){
+            $stats_participants = 0;
+            $processed_users = [];
+            foreach ( $participants_global_results as $participants ){
+                if ( isset( $participants['assigned_to'], $participants['participants'] ) && !in_array( $participants['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $participants['assigned_to'];
+                    $stats_participants += intval( $participants['participants'] );
+                }
+            }
+            $stats['stats_participants'] = $stats_participants;
+        }
+
         return $stats;
     }
 
@@ -580,6 +596,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             LEFT JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
             WHERE p.post_type = %s
             ORDER BY pm_ts.meta_value DESC) AS global_active_groups_stats
+            ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_participants_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, participants
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_participants.meta_value) participants, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_participants ON (p.ID = pm_participants.post_id) AND (pm_participants.meta_key = 'participants')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
             ", $start_ts, $end_ts, $post_type );
     }
 

@@ -114,6 +114,10 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
             [
                 'key'   => 'stats_active_groups',
                 'label' => __( 'Current Global Active Groups', 'disciple-tools-survey-collection' )
+            ],
+            [
+                'key'   => 'stats_participants',
+                'label' => __( 'Total Global Participants', 'disciple-tools-survey-collection' )
             ]
         ];
         if ( ! empty( $raw_stats ) ) {
