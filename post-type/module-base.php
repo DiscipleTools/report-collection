@@ -50,6 +50,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         add_filter( 'survey_collection_metrics_user_stats', [ $this, 'calculate_user_statistics' ], 10, 2 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
         add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
+        add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 100, 3 );
 
         //list
         add_filter( 'dt_user_list_filters', [ $this, 'dt_user_list_filters' ], 10, 2 );
@@ -808,6 +809,13 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         return $assigned_users;
     }
 
+    public function dt_post_created( $post_type, $post_id, $initial_fields ){
+        if ( ( $post_type === self::post_type() ) && !isset( $initial_fields['assigned_to'] ) ){
+            DT_Posts::update_post( $post_type, $post_id, [
+                'assigned_to' => 'user-' . get_current_user_id()
+            ] );
+        }
+    }
 }
 
 
