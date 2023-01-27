@@ -50,6 +50,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         add_filter( 'survey_collection_metrics_user_stats', [ $this, 'calculate_user_statistics' ], 10, 2 );
         add_filter( 'survey_collection_metrics_global_stats', [ $this, 'calculate_global_statistics' ], 10, 4 );
         add_action( 'survey_collection_metrics_dashboard_stats_html', [ $this, 'render_metrics_dashboard_stats_html' ], 10, 1 );
+        add_action( 'dt_post_created', [ $this, 'dt_post_created' ], 100, 3 );
 
         //list
         add_filter( 'dt_user_list_filters', [ $this, 'dt_user_list_filters' ], 10, 2 );
@@ -333,8 +334,32 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         // phpcs:disable
         $active_groups_global_results = $wpdb->get_results( self::calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
         // phpcs:enable
-        if ( ! empty( $active_groups_global_results ) ) {
-            $stats['stats_active_groups'] = $active_groups_global_results[0]['active_groups'];
+        if ( !empty( $active_groups_global_results ) ){
+            $stats_active_groups = 0;
+            $processed_users = [];
+            foreach ( $active_groups_global_results as $active_stats ){
+                if ( isset( $active_stats['assigned_to'], $active_stats['active_groups'] ) && !in_array( $active_stats['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $active_stats['assigned_to'];
+                    $stats_active_groups += intval( $active_stats['active_groups'] );
+                }
+            }
+            $stats['stats_active_groups'] = $stats_active_groups;
+        }
+
+        // Capture participants global statistics.
+        // phpcs:disable
+        $participants_global_results = $wpdb->get_results( self::calculate_global_participants_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
+        if ( !empty( $participants_global_results ) ){
+            $stats_participants = 0;
+            $processed_users = [];
+            foreach ( $participants_global_results as $participants ){
+                if ( isset( $participants['assigned_to'], $participants['participants'] ) && !in_array( $participants['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $participants['assigned_to'];
+                    $stats_participants += intval( $participants['participants'] );
+                }
+            }
+            $stats['stats_participants'] = $stats_participants;
         }
 
         return $stats;
@@ -564,14 +589,27 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
     private function calculate_global_active_groups_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
         return $wpdb->prepare( "
-        SELECT SUM(active_groups) active_groups
+        SELECT assigned_to, active_groups
             FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_groups.meta_value) active_groups, (pm_ts.meta_value) submit_date
             FROM $wpdb->posts p
             INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
             INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
             LEFT JOIN $wpdb->postmeta pm_groups ON (p.ID = pm_groups.post_id) AND (pm_groups.meta_key = 'active_groups')
             WHERE p.post_type = %s
-            ORDER BY pm_ts.meta_value DESC LIMIT 1) AS global_active_groups_stats
+            ORDER BY pm_ts.meta_value DESC) AS global_active_groups_stats
+            ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_participants_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, participants
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_participants.meta_value) participants, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_participants ON (p.ID = pm_participants.post_id) AND (pm_participants.meta_key = 'participants')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
             ", $start_ts, $end_ts, $post_type );
     }
 
@@ -689,6 +727,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     ],
                     'count' => $total_all
                 ];
+
+                $my_all_total = DT_Posts::list_posts( self::post_type(), [
+                    'fields' => [
+                        [
+                            'assigned_to' => [ 'me' ]
+                        ]
+                    ]
+                ] );
                 $filters['filters'][] = [
                     'ID'    => 'my_all',
                     'tab'   => 'all',
@@ -697,7 +743,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                         'assigned_to' => [ 'me' ],
                         'sort'        => 'status'
                     ],
-                    'count' => $total_all,
+                    'count' => $my_all_total['total'],
                 ];
 
                 foreach ( $fields['status']['default'] as $status_key => $status_value ) {
@@ -771,6 +817,13 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         return $assigned_users;
     }
 
+    public function dt_post_created( $post_type, $post_id, $initial_fields ){
+        if ( ( $post_type === self::post_type() ) && !isset( $initial_fields['assigned_to'] ) ){
+            DT_Posts::update_post( $post_type, $post_id, [
+                'assigned_to' => 'user-' . get_current_user_id()
+            ] );
+        }
+    }
 }
 
 
