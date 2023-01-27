@@ -245,6 +245,15 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/groups.svg',
                 'show_in_table' => 15
             ];
+            $fields['participants']   = [
+                'name'          => __( 'Participants', 'disciple-tools-survey-collection' ),
+                'description'   => __( 'Count of total group participants.', 'disciple-tools-survey-collection' ),
+                'type'          => 'number',
+                'default'       => '',
+                'tile'          => 'tracking',
+                'icon'          => get_template_directory_uri() . '/dt-assets/images/participants.svg',
+                'show_in_table' => 16
+            ];
         }
 
         return $fields;
