@@ -18,28 +18,34 @@
         $packaged_stats = [];
         $stats          = [
             [
-                'key'   => 'stats_new_baptisms_all_time',
-                'label' => __( 'Total New Baptisms', 'disciple-tools-survey-collection' )
-            ],
-            [
-                'key'   => 'stats_new_groups_all_time',
-                'label' => __( 'Total New Groups', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_prayers_all_time',
+                'label' => __( 'Total Prayers', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
             ],
             [
                 'key'   => 'stats_shares_all_time',
-                'label' => __( 'Total Shares', 'disciple-tools-survey-collection' )
-            ],
-            [
-                'key'   => 'stats_prayers_all_time',
-                'label' => __( 'Total Prayers', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Shares', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
             ],
             [
                 'key'   => 'stats_invites_all_time',
-                'label' => __( 'Total Invites', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Invites', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
+            ],
+            [
+                'key'   => 'stats_new_baptisms_all_time',
+                'label' => __( 'Total New Baptisms', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
+            ],
+            [
+                'key'   => 'stats_new_groups_all_time',
+                'label' => __( 'Total New Groups', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ],
             [
                 'key'   => 'stats_active_groups',
-                'label' => __( 'Current Active Groups', 'disciple-tools-survey-collection' )
+                'label' => __( 'Current Active Groups', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ]
         ];
 
@@ -75,6 +81,7 @@
                 $packaged_stats[] = [
                     'key'   => $stat['key'],
                     'label' => $stat['label'],
+                    'section' => $stat['section'] ?? 'lagging',
                     'value' => $raw_stats[ $stat['key'] ]
                 ];
             }

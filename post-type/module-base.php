@@ -302,24 +302,62 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     public function render_metrics_dashboard_stats_html( $stats ) {
-        ?>
-        <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
-            <?php
-            foreach ( $stats ?? [] as $stat ) {
-                if ( isset( $stat['value'], $stat['label'] ) ) {
-                    ?>
-                    <div style="margin-right: 30px; flex: 1 1 0;">
-                        <div><span
-                                style="font-size: 60px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ) ) ?></span>
-                        </div>
-                        <div><?php echo esc_attr( $stat['label'] ) ?></div>
-                    </div>
-                    <?php
+        $leading_section = [];
+        $lagging_section = [];
+
+        // Place stats into their respective sections.
+        foreach ( $stats ?? [] as $stat ){
+            if ( isset( $stat['value'], $stat['label'], $stat['section'] ) ){
+                if ( $stat['section'] == 'leading' ){
+                    $leading_section[] = $stat;
+
+                } else {
+                    $lagging_section[] = $stat;
                 }
             }
+        }
+
+        // Display leading section.
+        if ( count( $leading_section ) > 0 ){
             ?>
-        </div>
-        <?php
+            <h5><b><?php echo esc_attr( __( 'Leading Indicators', 'disciple-tools-survey-collection' ) ) ?></b></h5>
+            <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+            <?php
+            foreach ( $leading_section as $stat ){
+                ?>
+                <div style="margin-right: 30px; flex: 1 1 0;">
+                    <div><span
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ) ) ?></span>
+                    </div>
+                    <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                </div>
+                <?php
+            }
+            ?>
+            </div><br>
+            <?php
+        }
+
+        // Display lagging section.
+        if ( count( $lagging_section ) > 0 ){
+            ?>
+            <h5><b><?php echo esc_attr( __( 'Lagging Indicators', 'disciple-tools-survey-collection' ) ) ?></b></h5>
+            <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+            <?php
+            foreach ( $lagging_section as $stat ){
+                ?>
+                <div style="margin-right: 30px; flex: 1 1 0;">
+                    <div><span
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ) ) ?></span>
+                    </div>
+                    <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                </div>
+                <?php
+            }
+            ?>
+            </div>
+            <?php
+        }
     }
 
     public function calculate_global_statistics( $stats, $post_type, $start_ts, $end_ts ) {

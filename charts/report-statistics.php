@@ -60,7 +60,11 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                 'translations'        => [
                     'title'     => $this->title,
                     'sub_title' => __( 'Year-To-Date (YTD) Report Statistics', 'disciple-tools-survey-collection' ),
-                    'refresh'   => __( 'Refresh', 'disciple-tools-survey-collection' )
+                    'refresh'   => __( 'Refresh', 'disciple-tools-survey-collection' ),
+                    'sections'  => [
+                        'leading' => __( 'Leading Indicators', 'disciple-tools-survey-collection' ),
+                        'lagging' => __( 'Lagging Indicators', 'disciple-tools-survey-collection' )
+                    ]
                 ]
             ]
         );
@@ -96,32 +100,39 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
         $packaged_stats = [];
         $stats          = [
             [
-                'key'   => 'stats_new_baptisms',
-                'label' => __( 'Total Global New Baptisms', 'disciple-tools-survey-collection' )
-            ],
-            [
-                'key'   => 'stats_new_groups',
-                'label' => __( 'Total Global New Groups', 'disciple-tools-survey-collection' )
+                'key'   => 'stats_prayers',
+                'label' => __( 'Total Global Prayers', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
             ],
             [
                 'key'   => 'stats_shares',
-                'label' => __( 'Total Global Shares', 'disciple-tools-survey-collection' )
-            ],
-            [
-                'key'   => 'stats_prayers',
-                'label' => __( 'Total Global Prayers', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Global Shares', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
             ],
             [
                 'key'   => 'stats_invites',
-                'label' => __( 'Total Global Invites', 'disciple-tools-survey-collection' )
+                'label' => __( 'Total Global Invites', 'disciple-tools-survey-collection' ),
+                'section' => 'leading'
+            ],
+            [
+                'key'   => 'stats_new_baptisms',
+                'label' => __( 'Total Global New Baptisms', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
+            ],
+            [
+                'key'   => 'stats_new_groups',
+                'label' => __( 'Total Global New Groups', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ],
             [
                 'key'   => 'stats_active_groups',
-                'label' => __( 'Current Global Active Groups', 'disciple-tools-survey-collection' )
+                'label' => __( 'Current Global Active Groups', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ],
             [
                 'key'   => 'stats_participants',
-                'label' => __( 'Total Global Participants', 'disciple-tools-survey-collection' )
+                'label' => __( 'Active Global Participants', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ]
         ];
         if ( ! empty( $raw_stats ) ) {
@@ -130,6 +141,7 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                     $packaged_stats[] = [
                         'key'   => $stat['key'],
                         'label' => $stat['label'],
+                        'section' => $stat['section'],
                         'value' => $raw_stats[ $stat['key'] ]
                     ];
                 }
