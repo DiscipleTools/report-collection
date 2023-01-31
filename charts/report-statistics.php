@@ -56,7 +56,7 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                 'nonce'               => wp_create_nonce( 'wp_rest' ),
                 'current_user_login'  => wp_get_current_user()->user_login,
                 'current_user_id'     => get_current_user_id(),
-                'stats'               => $this->stats( 0, time() ),
+                'stats'               => $this->stats( $this->ytd_start(), time() ),
                 'translations'        => [
                     'title'     => $this->title,
                     'sub_title' => __( 'Year-To-Date (YTD) Report Statistics', 'disciple-tools-survey-collection' ),
@@ -64,6 +64,10 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                 ]
             ]
         );
+    }
+
+    public function ytd_start(){
+        return strtotime( gmdate( 'Y' ) . '/01/01' );
     }
 
     public function add_api_routes() {
@@ -80,7 +84,7 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
     }
 
     public function refresh( WP_REST_Request $request ) {
-        return $this->stats( 0, time() );
+        return $this->stats( $this->ytd_start(), time() );
     }
 
     private function stats( $start_ts, $end_ts ): array {
