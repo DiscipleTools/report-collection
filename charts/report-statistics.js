@@ -26,13 +26,15 @@
   }
 
   window.render_metrics_dashboard_stats_html = function (stats) {
-    let html = `<div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">`;
+    let html = '';
+    let leading_section = [];
+    let lagging_section = [];
 
-    // Iterate and display stats
+    // Place stats into their respective sections.
     if (stats) {
       jQuery.each(stats, function (idx, stat) {
-        if (stat['value'], stat['label']) {
-          html += `
+        if (stat['value'] && stat['label'] && stat['section']) {
+          let section_html = `
           <div style="margin-right: 30px; flex: 1 1 0;">
             <div>
                 <span style="font-size: 60px; font-weight: bold; color: blue;">${window.lodash.escape(stat['value'])}</span>
@@ -40,11 +42,37 @@
             <div>${window.lodash.escape(stat['label'])}</div>
           </div>
           `;
+
+          // Place html within respective section.
+          if (stat['section']==='leading') {
+            leading_section.push(section_html);
+
+          } else {
+            lagging_section.push(section_html);
+          }
         }
       });
     }
 
-    html += `</div>`;
+    // Display leading section.
+    if (leading_section.length > 0) {
+      html += `<h3><b>${window.wp_js_object.translations.sections.leading}</b></h3>`;
+      html += `<div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">`;
+      jQuery.each(leading_section, function (idx, stat_html) {
+        html += stat_html;
+      });
+      html += `</div><br><br><br>`;
+    }
+
+    // Display lagging section.
+    if (lagging_section.length > 0) {
+      html += `<h3><b>${window.wp_js_object.translations.sections.lagging}</b></h3>`;
+      html += `<div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">`;
+      jQuery.each(lagging_section, function (idx, stat_html) {
+        html += stat_html;
+      });
+      html += `</div>`;
+    }
 
     return html;
   }

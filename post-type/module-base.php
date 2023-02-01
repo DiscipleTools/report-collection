@@ -302,24 +302,62 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     }
 
     public function render_metrics_dashboard_stats_html( $stats ) {
-        ?>
-        <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
-            <?php
-            foreach ( $stats ?? [] as $stat ) {
-                if ( isset( $stat['value'], $stat['label'] ) ) {
-                    ?>
-                    <div style="margin-right: 30px; flex: 1 1 0;">
-                        <div><span
-                                style="font-size: 60px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ) ) ?></span>
-                        </div>
-                        <div><?php echo esc_attr( $stat['label'] ) ?></div>
-                    </div>
-                    <?php
+        $leading_section = [];
+        $lagging_section = [];
+
+        // Place stats into their respective sections.
+        foreach ( $stats ?? [] as $stat ){
+            if ( isset( $stat['value'], $stat['label'], $stat['section'] ) ){
+                if ( $stat['section'] == 'leading' ){
+                    $leading_section[] = $stat;
+
+                } else {
+                    $lagging_section[] = $stat;
                 }
             }
+        }
+
+        // Display leading section.
+        if ( count( $leading_section ) > 0 ){
             ?>
-        </div>
-        <?php
+            <h5><b><?php echo esc_attr( __( 'Leading Indicators', 'disciple-tools-survey-collection' ) ) ?></b></h5>
+            <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+            <?php
+            foreach ( $leading_section as $stat ){
+                ?>
+                <div style="margin-right: 30px; flex: 1 1 0;">
+                    <div><span
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( (int) $stat['value'] ) ) ?></span>
+                    </div>
+                    <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                </div>
+                <?php
+            }
+            ?>
+            </div><br>
+            <?php
+        }
+
+        // Display lagging section.
+        if ( count( $lagging_section ) > 0 ){
+            ?>
+            <h5><b><?php echo esc_attr( __( 'Lagging Indicators', 'disciple-tools-survey-collection' ) ) ?></b></h5>
+            <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+            <?php
+            foreach ( $lagging_section as $stat ){
+                ?>
+                <div style="margin-right: 30px; flex: 1 1 0;">
+                    <div><span
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( (int) $stat['value'] ) ) ?></span>
+                    </div>
+                    <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                </div>
+                <?php
+            }
+            ?>
+            </div>
+            <?php
+        }
     }
 
     public function calculate_global_statistics( $stats, $post_type, $start_ts, $end_ts ) {
@@ -515,6 +553,16 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                         $statistics['all_time'][$field_key] = $all_time_results_other_metric_fields[0]['field_metric'];
                     }
                 }
+
+                // Enforce specific participants personal metric calculations.
+                if ( isset( $statistics['all_time']['participants'] ) ){
+
+                    // phpcs:disable
+                    $all_time_results_participants = $wpdb->get_results( self::calculate_participants_statistics_prepare_sql( $wpdb, $current_user_id, 0, time(), $post_type ), ARRAY_A );
+                    // phpcs:enable
+
+                    $statistics['all_time']['participants'] = $all_time_results_participants[0]['participants'] ?? 0;
+                }
             }
         }
 
@@ -577,6 +625,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             LEFT JOIN $wpdb->postmeta pm_prayers ON (p.ID = pm_prayers.post_id) AND (pm_prayers.meta_key = 'prayers')
             LEFT JOIN $wpdb->postmeta pm_invites ON (p.ID = pm_invites.post_id) AND (pm_invites.meta_key = 'invites')
             WHERE p.post_type = %s) AS user_stats
+            ", $user_id, $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_participants_statistics_prepare_sql( $wpdb, $user_id, $start_ts, $end_ts, $post_type ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, participants
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_participants.meta_value) participants, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to' AND pm.meta_value = CONCAT( 'user-', %s ))
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_participants ON (p.ID = pm_participants.post_id) AND (pm_participants.meta_key = 'participants')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC LIMIT 1) AS global_participants_stats
             ", $user_id, $start_ts, $end_ts, $post_type );
     }
 
