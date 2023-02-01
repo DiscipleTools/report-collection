@@ -291,6 +291,12 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             'function' => '
                                 let rpt_start_date = jQuery("#rpt_start_date").parent().parent().find("#form_content_table_field_meta").val();
                                 let submit_date = jQuery("#submit_date").parent().parent().find("#form_content_table_field_meta").val();
+
+                                // Ensure both dates are present in order to carry out sanity check and default to true.
+                                if( !(rpt_start_date && submit_date) ) {
+                                    return true;
+                                }
+
                                 return parseInt(submit_date) > parseInt(rpt_start_date);
                             ',
                             'notice' => __( 'Start date falls after submission date, is this correct?', 'disciple_tools' )
