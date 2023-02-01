@@ -30,6 +30,11 @@
     let leading_section = [];
     let lagging_section = [];
 
+    function toFixedIfNecessary( value, dp = 2 ){
+      return +parseFloat(value).toFixed( dp );
+    }
+
+
     // Place stats into their respective sections.
     if (stats) {
       jQuery.each(stats, function (idx, stat) {
@@ -37,7 +42,7 @@
           let section_html = `
           <div style="margin-right: 30px; flex: 1 1 0;">
             <div>
-                <span style="font-size: 60px; font-weight: bold; color: blue;">${window.lodash.escape(stat['value'])}</span>
+                <span style="font-size: 60px; font-weight: bold; color: blue;">${window.lodash.escape( toFixedIfNecessary( stat['value'] ) )}</span>
             </div>
             <div>${window.lodash.escape(stat['label'])}</div>
           </div>
