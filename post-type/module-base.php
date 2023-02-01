@@ -327,7 +327,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( (int) $stat['value'] ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
@@ -348,7 +348,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( (int) $stat['value'] ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
