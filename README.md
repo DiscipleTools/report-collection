@@ -1,6 +1,9 @@
 ![Build Status](https://github.com/DiscipleTools/disciple-tools-survey-collection/actions/workflows/ci.yml/badge.svg?branch=master)
 
-![Plugin Banner](https://raw.githubusercontent.com/DiscipleTools/disciple-tools-survey-collection/b30402d97895e3f911efcb47fb8f29ccd1eb92e5/documentation/banner.png)
+
+
+
+![Plugin Banner](https://github.com/DiscipleTools/disciple-tools-survey-collection/raw/master/documentation/banner.png)
 
 # Disciple.Tools - Survey Collection
 
