@@ -454,6 +454,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         }
         if ( $raw_stats['misc'] ) {
             $packaged_stats['stats_active_groups'] = $raw_stats['misc']['active_groups'];
+            $packaged_stats['stats_accountability_days_since'] = $raw_stats['misc']['accountability_days_since'];
         }
 
         return $packaged_stats;
@@ -570,10 +571,10 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         $original_user = wp_get_current_user();
         wp_set_current_user( $current_user_id );
 
-        // Fetch active groups total from the latest report.
-        $active_groups_latest_total = DT_Posts::list_posts( 'reports', [
-            'limit'  => 1,
-            'sort'   => '-submit_date',
+        // Obtain handle to recently submitted report.
+        $recent_report_hit = DT_Posts::list_posts( 'reports', [
+            'limit' => 1,
+            'sort' => '-submit_date',
             'fields' => [
                 [
                     'assigned_to' => [ $current_user_id ]
@@ -585,7 +586,17 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     'active'
                 ]
             ]
-        ] )['posts'][0]['active_groups'] ?? 0;
+        ] );
+
+        // Fetch active groups total from the latest report.
+        $active_groups_latest_total = $recent_report_hit['posts'][0]['active_groups'] ?? 0;
+
+        // Determine days since last reported accountability.
+        $accountability_days_since = 0;
+        $accountability_ts = $recent_report_hit['posts'][0]['accountability']['timestamp'] ?? 0;
+        if ( $accountability_ts > 0 ){
+            $accountability_days_since = round( ( time() - $accountability_ts ) / 86400 /* Days in secs! */ );
+        }
 
         // Revert to original user.
         if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
@@ -594,7 +605,8 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
         // Capture miscellaneous stats.
         $statistics['misc'] = [
-            'active_groups' => $active_groups_latest_total
+            'active_groups' => $active_groups_latest_total,
+            'accountability_days_since' => $accountability_days_since
         ];
 
         return $statistics;
