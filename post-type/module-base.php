@@ -430,7 +430,6 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                             $accountability_in_range++;
                         }
                     }
-
                 }
             }
             $stats['stats_accountability'] = [
