@@ -409,6 +409,36 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             $stats['stats_participants'] = $stats_participants;
         }
 
+        // Capture accountability global statistics, from last x days.
+        $accountability_start_ts = strtotime( '-30 days', $end_ts );
+
+        // phpcs:disable
+        $accountability_global_results = $wpdb->get_results( self::calculate_global_accountability_statistics_prepare_sql( $wpdb, $post_type, $accountability_start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
+
+        if ( !empty( $accountability_global_results ) ){
+            $accountability_in_range = 0;
+            $processed_users = [];
+            foreach ( $accountability_global_results as $accountability_stats ){
+                if ( isset( $accountability_stats['assigned_to'], $accountability_stats['accountability_ts'] ) && !in_array( $accountability_stats['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $accountability_stats['assigned_to'];
+
+                    // Determine if accountability timestamp is within specified range.
+                    $accountability_ts = $accountability_stats['accountability_ts'];
+                    if ( !empty( $accountability_ts ) && is_numeric( $accountability_ts ) ){
+                        if ( ( $accountability_ts >= $accountability_start_ts ) && ( $accountability_ts <= $end_ts ) ){
+                            $accountability_in_range++;
+                        }
+                    }
+
+                }
+            }
+            $stats['stats_accountability'] = [
+                'user_count' => count( $processed_users ),
+                'in_range_count' => $accountability_in_range
+            ];
+        }
+
         return $stats;
     }
 
@@ -692,6 +722,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             LEFT JOIN $wpdb->postmeta pm_participants ON (p.ID = pm_participants.post_id) AND (pm_participants.meta_key = 'participants')
             WHERE p.post_type = %s
             ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
+            ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_accountability_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, accountability_ts
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_accountability.meta_value) accountability_ts, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_accountability ON (p.ID = pm_accountability.post_id) AND (pm_accountability.meta_key = 'accountability')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC) AS global_accountability_stats
             ", $start_ts, $end_ts, $post_type );
     }
 

@@ -63,7 +63,12 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                     'refresh'   => __( 'Refresh', 'disciple-tools-survey-collection' ),
                     'sections'  => [
                         'leading' => __( 'Leading Indicators', 'disciple-tools-survey-collection' ),
-                        'lagging' => __( 'Lagging Indicators', 'disciple-tools-survey-collection' )
+                        'lagging' => __( 'Lagging Indicators', 'disciple-tools-survey-collection' ),
+                        'accountability' => [
+                            'account' => __( 'Accounted', 'disciple-tools-survey-collection' ),
+                            'not_account' => __( 'Not Accounted', 'disciple-tools-survey-collection' ),
+                            'user' => __( 'Users', 'disciple-tools-survey-collection' )
+                        ]
                     ]
                 ]
             ]
@@ -135,6 +140,9 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                 'section' => 'lagging'
             ]
         ];
+
+        // Start packaging response stats.
+        $response = [];
         if ( ! empty( $raw_stats ) ) {
             foreach ( $stats as $stat ) {
                 if ( isset( $raw_stats[ $stat['key'] ] ) ) {
@@ -146,8 +154,19 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                     ];
                 }
             }
+            $response['general'] = $packaged_stats;
+
+            // Package any detected accountability stats.
+            if ( isset( $raw_stats['stats_accountability'] ) ){
+                $response['accountability'] = [
+                    'key' => 'stats_accountability',
+                    'label' => __( 'Accountability Meetings Within Past 30 Days Of Submitted Reports', 'disciple-tools-survey-collection' ),
+                    'section' => 'accountability',
+                    'stats' => $raw_stats['stats_accountability']
+                ];
+            }
         }
 
-        return $packaged_stats;
+        return $response;
     }
 }
