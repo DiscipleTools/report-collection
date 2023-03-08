@@ -254,6 +254,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/participants.svg',
                 'show_in_table' => 16
             ];
+            $fields['accountability']    = [
+                'name'        => __( 'Accountability', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Last accountability date.', 'disciple-tools-survey-collection' ),
+                'type'        => 'date',
+                'default'     => '',
+                'tile'        => 'tracking',
+                'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
+            ];
         }
 
         return $fields;
@@ -327,7 +335,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( is_numeric( $stat['value'] ) ? number_format( $stat['value'] ?: 0 ) : $stat['value'] ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
@@ -348,7 +356,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( is_numeric( $stat['value'] ) ? number_format( $stat['value'] ?: 0 ) : $stat['value'] ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
@@ -409,6 +417,35 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             $stats['stats_participants'] = $stats_participants;
         }
 
+        // Capture accountability global statistics, from last x days.
+        $accountability_start_ts = strtotime( '-30 days', $end_ts );
+
+        // phpcs:disable
+        $accountability_global_results = $wpdb->get_results( self::calculate_global_accountability_statistics_prepare_sql( $wpdb, $post_type, $accountability_start_ts, $end_ts ), ARRAY_A );
+        // phpcs:enable
+
+        if ( !empty( $accountability_global_results ) ){
+            $accountability_in_range = 0;
+            $processed_users = [];
+            foreach ( $accountability_global_results as $accountability_stats ){
+                if ( isset( $accountability_stats['assigned_to'], $accountability_stats['accountability_ts'] ) && !in_array( $accountability_stats['assigned_to'], $processed_users ) ){
+                    $processed_users[] = $accountability_stats['assigned_to'];
+
+                    // Determine if accountability timestamp is within specified range.
+                    $accountability_ts = $accountability_stats['accountability_ts'];
+                    if ( !empty( $accountability_ts ) && is_numeric( $accountability_ts ) ){
+                        if ( ( $accountability_ts >= $accountability_start_ts ) && ( $accountability_ts <= $end_ts ) ){
+                            $accountability_in_range++;
+                        }
+                    }
+                }
+            }
+            $stats['stats_accountability'] = [
+                'user_count' => count( $processed_users ),
+                'in_range_count' => $accountability_in_range
+            ];
+        }
+
         return $stats;
     }
 
@@ -454,6 +491,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         }
         if ( $raw_stats['misc'] ) {
             $packaged_stats['stats_active_groups'] = $raw_stats['misc']['active_groups'];
+            $packaged_stats['stats_accountability_days_since'] = $raw_stats['misc']['accountability_days_since'];
         }
 
         return $packaged_stats;
@@ -570,10 +608,10 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         $original_user = wp_get_current_user();
         wp_set_current_user( $current_user_id );
 
-        // Fetch active groups total from the latest report.
-        $active_groups_latest_total = DT_Posts::list_posts( 'reports', [
-            'limit'  => 1,
-            'sort'   => '-submit_date',
+        // Obtain handle to recently submitted report.
+        $recent_report_hit = DT_Posts::list_posts( 'reports', [
+            'limit' => 1,
+            'sort' => '-submit_date',
             'fields' => [
                 [
                     'assigned_to' => [ $current_user_id ]
@@ -585,7 +623,31 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                     'active'
                 ]
             ]
-        ] )['posts'][0]['active_groups'] ?? 0;
+        ] );
+
+        // Fetch active groups total from the latest report.
+        $active_groups_latest_total = $recent_report_hit['posts'][0]['active_groups'] ?? 0;
+
+        // Determine days since last reported accountability.
+        $accountability_days_since = -1;
+        $accountability_ts = DT_Posts::list_posts( 'reports', [
+            'limit' => 1,
+            'sort' => '-accountability',
+            'fields' => [
+                [
+                    'assigned_to' => [ $current_user_id ]
+                ],
+                'status' => [
+                    'new',
+                    'unassigned',
+                    'assigned',
+                    'active'
+                ]
+            ]
+        ] )['posts'][0]['accountability']['timestamp'] ?? 0;
+        if ( $accountability_ts > 0 ){
+            $accountability_days_since = round( ( time() - $accountability_ts ) / 86400 /* Days in secs! */ );
+        }
 
         // Revert to original user.
         if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
@@ -594,7 +656,8 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
 
         // Capture miscellaneous stats.
         $statistics['misc'] = [
-            'active_groups' => $active_groups_latest_total
+            'active_groups' => $active_groups_latest_total,
+            'accountability_days_since' => ( $accountability_days_since >= 0 ) ? $accountability_days_since : '-'
         ];
 
         return $statistics;
@@ -680,6 +743,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             LEFT JOIN $wpdb->postmeta pm_participants ON (p.ID = pm_participants.post_id) AND (pm_participants.meta_key = 'participants')
             WHERE p.post_type = %s
             ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
+            ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_accountability_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, accountability_ts
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_accountability.meta_value) accountability_ts, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_accountability ON (p.ID = pm_accountability.post_id) AND (pm_accountability.meta_key = 'accountability')
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC) AS global_accountability_stats
             ", $start_ts, $end_ts, $post_type );
     }
 

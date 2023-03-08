@@ -23,6 +23,11 @@
 
     // Display statistics
     jQuery('#chartdiv').empty().html(render_metrics_dashboard_stats_html(localizedObject.stats));
+
+    // If accountability is detected, display associated chart.
+    if (localizedObject.stats['accountability']) {
+      render_accountability_stats(localizedObject.stats['accountability']);
+    }
   }
 
   window.render_metrics_dashboard_stats_html = function (stats) {
@@ -34,10 +39,9 @@
       return +parseFloat(value).toFixed( dp );
     }
 
-
     // Place stats into their respective sections.
-    if (stats) {
-      jQuery.each(stats, function (idx, stat) {
+    if (stats['general']) {
+      jQuery.each(stats['general'], function (idx, stat) {
         if (stat['value'] && stat['label'] && stat['section']) {
           let section_html = `
           <div style="margin-right: 30px; flex: 1 1 0;">
@@ -79,7 +83,45 @@
       html += `</div>`;
     }
 
+    // If available, create accountability chart div placeholder.
+    if (stats['accountability']) {
+      html += `<br><br><br><h3><b>${window.lodash.escape(stats['accountability']['label'])}</b></h3>`;
+      html += `<div id="accountability_chart_div" style="min-width: 75%; max-width: 75%; min-height: 500px; margin: auto;"></div>`;
+    }
+
     return html;
+  }
+
+  window.render_accountability_stats = function (stats) {
+    let container = am4core.create("accountability_chart_div", am4core.Container);
+    container.width = am4core.percent(100);
+    container.height = am4core.percent(100);
+    container.layout = "horizontal";
+
+    // Create and populate chart.
+    let chart = container.createChild(am4charts.PieChart);
+    chart.innerRadius = am4core.percent(30);
+    chart.legend = new am4charts.Legend();
+
+    // Add generated data.
+    chart.data = [
+      {
+        'category': window.lodash.escape(window.wp_js_object.translations.sections.accountability.account),
+        'value': stats['stats']['in_range_count']
+      },
+      {
+        'category': window.lodash.escape(window.wp_js_object.translations.sections.accountability.not_account),
+        'value': (stats['stats']['user_count'] - stats['stats']['in_range_count'])
+      }
+    ];
+
+    // Add and configure Series.
+    let series = chart.series.push(new am4charts.PieSeries());
+    series.dataFields.value = "value";
+    series.dataFields.category = "category";
+    series.slices.template.tooltipText = "{category}: {value.percent.formatNumber('#.#')}% ({value} " + window.lodash.escape(window.wp_js_object.translations.sections.accountability.user) + ")";
+    series.labels.template.disabled = true;
+    series.labels.template.text = "{category}: {value.percent.formatNumber('#.#')}% ({value} " + window.lodash.escape(window.wp_js_object.translations.sections.accountability.user) + ")";
   }
 
   window.refresh_api_call = function refresh_api_call() {
@@ -107,6 +149,12 @@
         let chart_div = jQuery('#chartdiv');
         chart_div.fadeOut('fast', function () {
           chart_div.empty().html(render_metrics_dashboard_stats_html(data));
+
+          // If accountability is detected, display associated chart.
+          if (data['accountability']) {
+            render_accountability_stats(data['accountability']);
+          }
+
           chart_div.fadeIn('fast');
         });
 

@@ -46,6 +46,11 @@
                 'key'   => 'stats_active_groups',
                 'label' => __( 'Current Active Groups', 'disciple-tools-survey-collection' ),
                 'section' => 'lagging'
+            ],
+            [
+                'key' => 'stats_accountability_days_since',
+                'label' => __( 'Days Since Last Reported Accountability', 'disciple-tools-survey-collection' ),
+                'section' => 'lagging'
             ]
         ];
 
@@ -63,6 +68,7 @@
             'active_groups'
         ] );
 
+        // Capture other metric fields within overall stats.
         if ( !empty( $other_metric_fields ) ){
             foreach ( $other_metric_fields as $field_key => $field ){
                 if ( isset( $field['name'] ) ){
