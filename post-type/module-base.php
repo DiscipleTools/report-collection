@@ -254,6 +254,14 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 'icon'          => get_template_directory_uri() . '/dt-assets/images/participants.svg',
                 'show_in_table' => 16
             ];
+            $fields['accountability']    = [
+                'name'        => __( 'Accountability', 'disciple-tools-survey-collection' ),
+                'description' => __( 'Last accountability date.', 'disciple-tools-survey-collection' ),
+                'type'        => 'date',
+                'default'     => '',
+                'tile'        => 'tracking',
+                'icon'        => get_template_directory_uri() . '/dt-assets/images/date.svg',
+            ];
         }
 
         return $fields;
@@ -327,7 +335,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( is_numeric( $stat['value'] ) ? number_format( $stat['value'] ?: 0 ) : $stat['value'] ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
@@ -348,7 +356,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 ?>
                 <div style="margin-right: 30px; flex: 1 1 0;">
                     <div><span
-                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( number_format( $stat['value'] ?: 0 ) ) ?></span>
+                            style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( is_numeric( $stat['value'] ) ? number_format( $stat['value'] ?: 0 ) : $stat['value'] ) ?></span>
                     </div>
                     <div><?php echo esc_attr( $stat['label'] ) ?></div>
                 </div>
@@ -621,8 +629,22 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         $active_groups_latest_total = $recent_report_hit['posts'][0]['active_groups'] ?? 0;
 
         // Determine days since last reported accountability.
-        $accountability_days_since = 0;
-        $accountability_ts = $recent_report_hit['posts'][0]['accountability']['timestamp'] ?? 0;
+        $accountability_days_since = -1;
+        $accountability_ts = DT_Posts::list_posts( 'reports', [
+            'limit' => 1,
+            'sort' => '-accountability',
+            'fields' => [
+                [
+                    'assigned_to' => [ $current_user_id ]
+                ],
+                'status' => [
+                    'new',
+                    'unassigned',
+                    'assigned',
+                    'active'
+                ]
+            ]
+        ] )['posts'][0]['accountability']['timestamp'] ?? 0;
         if ( $accountability_ts > 0 ){
             $accountability_days_since = round( ( time() - $accountability_ts ) / 86400 /* Days in secs! */ );
         }
@@ -635,7 +657,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
         // Capture miscellaneous stats.
         $statistics['misc'] = [
             'active_groups' => $active_groups_latest_total,
-            'accountability_days_since' => $accountability_days_since
+            'accountability_days_since' => ( $accountability_days_since >= 0 ) ? $accountability_days_since : '-'
         ];
 
         return $statistics;
