@@ -9,24 +9,30 @@
 
 ![image](https://user-images.githubusercontent.com/24901539/230605327-5de47a16-e1bb-45a5-bacf-c2e3195862cd.png)
 
+Collect **Lead Metrics**: Shares, Prayers, Invitations...
+Lead metrics are the things we CAN do.  
+
+Collect **Lag Metrics**: Baptisms, Groups...
+Lag metrics is the section that God is responsible for.
 
 Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.
 
 ## Purpose
 
-The purpose of the Disciple.Tools - Survey Collection plugin is to streamline the regular collection of statistics from a range of activities; namely, new baptisms & groups; as well as total number of shares, prayers and invitations.
+This tool helps ministries collect and present the activity of their team members. Knowing that:
+- What you measure is what people focus on. What people focus on are the things that grow.
+- Regular collection from the field gives better data and trends than sporadic and infrequent collection.
+- Some goals are within our control (lead) and some are only accomplished when the Spirit moves - it’s good to know the difference and focus effort in the area of control (raising the sails for when the Spirit blows).
 
 ## Usage
 
 #### Will Do
 
-- Integrate with Disciple.Tools Magic Links for the regular sending out of report survey collection form links.
-- Integrate with Disciple.Tools Dashboard for the displaying of user related statistics.
-- Capture report statistics without having to log into a running Disciple.Tools instance.
-- Display report tracking tile fields within survey collection magic link forms.
-- Display YTD & All Time statistics within report post type records.
-- Display global statistic metrics.
-- Present assigned user record filters.
+- Gives each team member their own form to report their activity.
+- Automatically send each team member a link to their form every week (or every x days). 
+- See a summary of each member’s activity.
+- Give each member a summary of their activity on their dashboard.
+- Work and celebrate together with the combined metrics summary on the the global dashboard 
 
 #### Will Not Do
 
@@ -35,15 +41,13 @@ The purpose of the Disciple.Tools - Survey Collection plugin is to streamline th
 
 ## Requirements
 
-- Disciple.Tools Theme installed on a Wordpress Server
-- Disciple.Tools Magic Links plugin installed on the same Wordpress Server
-- Disciple.Tools Dashboard plugin installed on the same Wordpress Server
+* Disciple.Tools
+* [Disciple.Tools Magic Links](https://disciple.tools/plugins/magic-link-sender/) 
+* [Disciple.Tools Dashboard](https://disciple.tools/plugins/dashboard/)
 
-## Installing
+## Installing and Features
 
-- Ensure all required plugins are first installed and configured; prior to the final installation of Disciple.Tools - Survey Collection.
-- Install as a standard Disciple.Tools/Wordpress plugin in the system Admin/Plugins area.
-- Requires the user role of Administrator.
+See Documentation in the [wiki](https://github.com/DiscipleTools/disciple-tools-survey-collection/wiki)
 
 ## Contribution
 
