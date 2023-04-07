@@ -7,6 +7,9 @@
 
 # Disciple.Tools - Survey Collection
 
+![image](https://user-images.githubusercontent.com/24901539/230605327-5de47a16-e1bb-45a5-bacf-c2e3195862cd.png)
+
+
 Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.
 
 ## Purpose
