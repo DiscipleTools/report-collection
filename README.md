@@ -15,8 +15,6 @@ Lead metrics are the things we CAN do.
 Collect **Lag Metrics**: Baptisms, Groups...
 Lag metrics is the section that God is responsible for.
 
-Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.
-
 ## Purpose
 
 This tool helps ministries collect and present the activity of their team members. Knowing that:
