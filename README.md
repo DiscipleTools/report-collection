@@ -24,16 +24,14 @@ This tool helps ministries collect and present the activity of their team member
 
 ## Usage
 
-#### Will Do
-
+This plugin will:
 - Gives each team member their own form to report their activity.
 - Automatically send each team member a link to their form every week (or every x days). 
 - See a summary of each member’s activity.
 - Give each member a summary of their activity on their dashboard.
 - Work and celebrate together with the combined metrics summary on the the global dashboard 
 
-#### Will Not Do
-
+This plugin won't:
 - Presentation of team based statistics.
 - Auto fetching of report statistics from remote Disciple.Tools instances.
 
@@ -45,7 +43,12 @@ This tool helps ministries collect and present the activity of their team member
 
 ## Installing and Features
 
-See Documentation in the [wiki](https://github.com/DiscipleTools/disciple-tools-survey-collection/wiki)
+See [Documentation](https://github.com/DiscipleTools/disciple-tools-survey-collection/wiki) for:
+- Plugin Setup
+- Adding team members
+- Viewing and customizing the form
+- Auto sending email reminders
+- Global and team member metrics
 
 ## Contribution
 
