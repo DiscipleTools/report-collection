@@ -312,15 +312,21 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
     public function render_metrics_dashboard_stats_html( $stats ) {
         $leading_section = [];
         $lagging_section = [];
+        $custom_section = [];
 
         // Place stats into their respective sections.
         foreach ( $stats ?? [] as $stat ){
             if ( isset( $stat['value'], $stat['label'], $stat['section'] ) ){
-                if ( $stat['section'] == 'leading' ){
-                    $leading_section[] = $stat;
-
-                } else {
-                    $lagging_section[] = $stat;
+                switch ( $stat['section'] ){
+                    case 'leading':
+                        $leading_section[] = $stat;
+                        break;
+                    case 'lagging':
+                        $lagging_section[] = $stat;
+                        break;
+                    case 'custom':
+                        $custom_section[] = $stat;
+                        break;
                 }
             }
         }
@@ -363,6 +369,27 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 <?php
             }
             ?>
+            </div>
+            <?php
+        }
+
+        // Display custom section.
+        if ( count( $custom_section ) > 0 ){
+            ?>
+            <h5><b><?php echo esc_attr( __( 'Custom Indicators', 'disciple-tools-survey-collection' ) ) ?></b></h5>
+            <div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">
+                <?php
+                foreach ( $custom_section as $stat ){
+                    ?>
+                    <div style="margin-right: 30px; flex: 1 1 0;">
+                        <div><span
+                                style="font-size: 30px; font-weight: bold; color: blue;"><?php echo esc_attr( is_numeric( $stat['value'] ) ? number_format( $stat['value'] ?: 0 ) : $stat['value'] ) ?></span>
+                        </div>
+                        <div><?php echo esc_attr( $stat['label'] ) ?></div>
+                    </div>
+                    <?php
+                }
+                ?>
             </div>
             <?php
         }
@@ -415,6 +442,51 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 }
             }
             $stats['stats_participants'] = $stats_participants;
+        }
+
+        // Capture custom field global statistics.
+        $supported_field_types = [ 'number' ];
+        $supported_field_tiles = [ 'tracking' ];
+        $ignored_fields = [
+            'status',
+            'assigned_to',
+            'submit_date',
+            'rpt_start_date',
+            'shares',
+            'prayers',
+            'invites',
+            'new_baptisms',
+            'new_groups',
+            'active_groups',
+            'participants',
+            'accountability'
+        ];
+        $stats['stats_custom'] = [];
+        $custom_field_settings = DT_Posts::get_post_field_settings( 'reports', false );
+        foreach ( $custom_field_settings ?? [] as $field_key => $field_setting ){
+            if ( isset( $field_setting['type'], $field_setting['tile'] ) ){
+                if ( in_array( $field_setting['type'], $supported_field_types ) &&
+                    in_array( $field_setting['tile'], $supported_field_tiles ) &&
+                    !in_array( $field_key, $ignored_fields ) ){
+
+                    // phpcs:disable
+                    $custom_global_results = $wpdb->get_results( self::calculate_global_custom_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts, $field_key ), ARRAY_A );
+                    // phpcs:enable
+
+                    // Capture field statistic counts by assigned user.
+                    if ( !empty( $custom_global_results ) ){
+                        $stats_total = 0;
+                        $processed_users = [];
+                        foreach ( $custom_global_results as $custom ){
+                            if ( isset( $custom['assigned_to'], $custom['custom'] ) && !in_array( $custom['assigned_to'], $processed_users ) ){
+                                $processed_users[] = $custom['assigned_to'];
+                                $stats_total += intval( $custom['custom'] );
+                            }
+                        }
+                        $stats['stats_custom'][$field_key] = $stats_total;
+                    }
+                }
+            }
         }
 
         // Capture accountability global statistics, from last x days.
@@ -744,6 +816,19 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             WHERE p.post_type = %s
             ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
             ", $start_ts, $end_ts, $post_type );
+    }
+
+    private function calculate_global_custom_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts, $field_key ) {
+        return $wpdb->prepare( "
+        SELECT assigned_to, custom
+            FROM (SELECT p.ID, (pm.meta_value) assigned_to, (pm_custom.meta_value) custom, (pm_ts.meta_value) submit_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta pm ON (p.ID = pm.post_id) AND (pm.meta_key = 'assigned_to')
+            INNER JOIN $wpdb->postmeta pm_ts ON (p.ID = pm_ts.post_id) AND (pm_ts.meta_key = 'submit_date' AND pm_ts.meta_value BETWEEN %d AND %d)
+            LEFT JOIN $wpdb->postmeta pm_custom ON (p.ID = pm_custom.post_id) AND (pm_custom.meta_key = %s)
+            WHERE p.post_type = %s
+            ORDER BY pm_ts.meta_value DESC) AS global_participants_stats
+            ", $start_ts, $end_ts, $field_key, $post_type );
     }
 
     private function calculate_global_accountability_statistics_prepare_sql( $wpdb, $post_type, $start_ts, $end_ts ) {

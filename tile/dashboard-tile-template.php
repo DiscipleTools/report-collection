@@ -3,8 +3,9 @@
     <div style="display: inline-block" class="stats-spinner loading-spinner"></div>
 </div>
 <div class="tile-subheader"><?php esc_html_e( 'All Time', 'disciple-tools-survey-collection' ) ?></div>
-<div class="tile-body tile-body--center">
+<div class="tile-body tile-body--center" style="overflow: auto;">
     <div>
+        <br><br>
         <p><?php esc_html_e( 'Reports with submission dates set in the future are not included within metric calculations.', 'disciple-tools-survey-collection' ) ?></p>
         <p style="text-align: center; display: none" id="empty_survey_collection_stats">
             <strong><?php esc_html_e( 'No data to show yet. You have no active reports', 'disciple-tools-survey-collection' ) ?></strong>
@@ -75,7 +76,8 @@
                     $key = 'stats_' . $field_key . '_all_time';
                     $stats[] = [
                         'key' => $key,
-                        'label' => sprintf( __( 'Total %s', 'disciple-tools-survey-collection' ), $field['name'] )
+                        'label' => sprintf( __( 'Total %s', 'disciple-tools-survey-collection' ), $field['name'] ),
+                        'section' => 'custom'
                     ];
                 }
             }
@@ -84,10 +86,25 @@
         // Package final stats shape and render html display.
         foreach ( $stats as $stat ) {
             if ( isset( $raw_stats[ $stat['key'] ] ) ) {
+
+                // Determine section.
+                switch ( $stat['section'] ) {
+                    case 'leading':
+                        $section = 'leading';
+                        break;
+                    case 'lagging':
+                        $section = 'lagging';
+                        break;
+                    default:
+                        $section = 'custom';
+                        break;
+                }
+
+                // Package final stats shape.
                 $packaged_stats[] = [
                     'key'   => $stat['key'],
                     'label' => $stat['label'],
-                    'section' => $stat['section'] ?? 'lagging',
+                    'section' => $section,
                     'value' => $raw_stats[ $stat['key'] ]
                 ];
             }
@@ -96,7 +113,7 @@
         do_action( 'survey_collection_metrics_dashboard_stats_html', $packaged_stats );
         ?>
 
-        <br><br>
+        <br>
         <a href="<?php echo esc_url( site_url() . '/metrics/disciple-tools-survey-collection-metrics/report_stats' ) ?>"
            class="button select-button"
            style="min-width: 100%;"><?php esc_html_e( 'See Global Dashboard', 'disciple-tools-survey-collection' ) ?></a>
