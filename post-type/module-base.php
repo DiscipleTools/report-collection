@@ -369,7 +369,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 <?php
             }
             ?>
-            </div>
+            </div><br>
             <?php
         }
 
