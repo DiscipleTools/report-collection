@@ -34,6 +34,7 @@
     let html = '';
     let leading_section = [];
     let lagging_section = [];
+    let custom_section = [];
 
     function toFixedIfNecessary( value, dp = 2 ){
       return +parseFloat(value).toFixed( dp );
@@ -53,12 +54,21 @@
           `;
 
           // Place html within respective section.
-          if (stat['section']==='leading') {
-            leading_section.push(section_html);
-
-          } else {
-            lagging_section.push(section_html);
+          switch (stat['section']) {
+            case 'leading': {
+              leading_section.push(section_html);
+              break;
+            }
+            case 'lagging': {
+              lagging_section.push(section_html);
+              break;
+            }
+            case 'custom': {
+              custom_section.push(section_html);
+              break;
+            }
           }
+
         }
       });
     }
@@ -70,7 +80,7 @@
       jQuery.each(leading_section, function (idx, stat_html) {
         html += stat_html;
       });
-      html += `</div><br><br><br>`;
+      html += `</div><br><br>`;
     }
 
     // Display lagging section.
@@ -80,12 +90,22 @@
       jQuery.each(lagging_section, function (idx, stat_html) {
         html += stat_html;
       });
+      html += `</div><br><br>`;
+    }
+
+    // Display custom section.
+    if (custom_section.length > 0) {
+      html += `<h3><b>${window.wp_js_object.translations.sections.custom}</b></h3>`;
+      html += `<div style="display: flex; flex-flow: row wrap; justify-content: center; overflow: auto;">`;
+      jQuery.each(custom_section, function (idx, stat_html) {
+        html += stat_html;
+      });
       html += `</div>`;
     }
 
     // If available, create accountability chart div placeholder.
     if (stats['accountability']) {
-      html += `<br><br><br><h3><b>${window.lodash.escape(stats['accountability']['label'])}</b></h3>`;
+      html += `<br><br><h3><b>${window.lodash.escape(stats['accountability']['label'])}</b></h3>`;
       html += `<div id="accountability_chart_div" style="min-width: 75%; max-width: 75%; min-height: 500px; margin: auto;"></div>`;
     }
 

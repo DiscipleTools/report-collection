@@ -115,6 +115,37 @@ class Disciple_Tools_Survey_Collection_Tile {
                 'all_time' => 'stats_invites_all_time'
             ]
         ];
+
+        // Capture additional custom fields which satisfy our requirements.
+        $supported_field_types = [ 'number' ];
+        $supported_field_tiles = [ 'tracking' ];
+        $ignored_fields = [
+            'status',
+            'assigned_to',
+            'submit_date',
+            'rpt_start_date',
+            'shares',
+            'prayers',
+            'invites',
+            'new_baptisms',
+            'new_groups',
+            'active_groups',
+            'participants',
+            'accountability'
+        ];
+        $custom_field_settings = DT_Posts::get_post_field_settings( 'reports', false );
+        foreach ( $custom_field_settings as $field_key => $setting ){
+            if ( isset( $setting['name'], $setting['type'], $setting['tile'] ) ){
+                if ( in_array( $setting['type'], $supported_field_types ) && in_array( $setting['tile'], $supported_field_tiles ) && !in_array( $field_key, $ignored_fields ) ){
+                    $stats_fields[] = [
+                        'label' => $setting['name'],
+                        'ytd' => 'stats_' . $field_key . '_ytd',
+                        'all_time' => 'stats_' . $field_key . '_all_time'
+                    ];
+                }
+            }
+        }
+
         if ( ( $post_type === 'reports' ) && $section === 'statistics' ) {
             $post = DT_Posts::get_post( $post_type, get_the_ID() );
             ?>

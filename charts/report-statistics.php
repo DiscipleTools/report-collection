@@ -64,6 +64,7 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                     'sections'  => [
                         'leading' => __( 'Leading Indicators', 'disciple-tools-survey-collection' ),
                         'lagging' => __( 'Lagging Indicators', 'disciple-tools-survey-collection' ),
+                        'custom' => __( 'Custom Indicators', 'disciple-tools-survey-collection' ),
                         'accountability' => [
                             'account' => __( 'Accounted', 'disciple-tools-survey-collection' ),
                             'not_account' => __( 'Not Accounted', 'disciple-tools-survey-collection' ),
@@ -154,6 +155,22 @@ class Disciple_Tools_Survey_Collection_Report_Statistics extends DT_Metrics_Char
                     ];
                 }
             }
+
+            // Package any identified custom fields.
+            if ( !empty( $raw_stats['stats_custom'] ) ){
+                $custom_field_settings = DT_Posts::get_post_field_settings( 'reports', false );
+                foreach ( $raw_stats['stats_custom'] as $field_key => $stat ){
+                    if ( isset( $custom_field_settings[$field_key], $custom_field_settings[$field_key]['name'] ) ){
+                        $packaged_stats[] = [
+                            'key' => $field_key,
+                            'label' => $custom_field_settings[$field_key]['name'],
+                            'section' => 'custom',
+                            'value' => $stat
+                        ];
+                    }
+                }
+            }
+
             $response['general'] = $packaged_stats;
 
             // Package any detected accountability stats.
