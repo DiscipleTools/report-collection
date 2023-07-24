@@ -561,7 +561,7 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
                 $packaged_stats['stats_' . $key . '_all_time'] = $raw_stats['all_time'][$key];
             }
         }
-        if ( $raw_stats['misc'] ) {
+        if ( isset( $raw_stats['misc'] ) ) {
             $packaged_stats['stats_active_groups'] = $raw_stats['misc']['active_groups'];
             $packaged_stats['stats_accountability_days_since'] = $raw_stats['misc']['accountability_days_since'];
         }
@@ -697,40 +697,43 @@ class Disciple_Tools_Survey_Collection_Base extends DT_Module_Base {
             ]
         ] );
 
-        // Fetch active groups total from the latest report.
-        $active_groups_latest_total = $recent_report_hit['posts'][0]['active_groups'] ?? 0;
+        if ( !is_wp_error( $recent_report_hit ) ){
 
-        // Determine days since last reported accountability.
-        $accountability_days_since = -1;
-        $accountability_ts = DT_Posts::list_posts( 'reports', [
-            'limit' => 1,
-            'sort' => '-accountability',
-            'fields' => [
-                [
-                    'assigned_to' => [ $current_user_id ]
-                ],
-                'status' => [
-                    'new',
-                    'unassigned',
-                    'assigned',
-                    'active'
+            // Fetch active groups total from the latest report.
+            $active_groups_latest_total = $recent_report_hit['posts'][0]['active_groups'] ?? 0;
+
+            // Determine days since last reported accountability.
+            $accountability_days_since = -1;
+            $accountability_ts = DT_Posts::list_posts( 'reports', [
+                'limit' => 1,
+                'sort' => '-accountability',
+                'fields' => [
+                    [
+                        'assigned_to' => [ $current_user_id ]
+                    ],
+                    'status' => [
+                        'new',
+                        'unassigned',
+                        'assigned',
+                        'active'
+                    ]
                 ]
-            ]
-        ] )['posts'][0]['accountability']['timestamp'] ?? 0;
-        if ( $accountability_ts > 0 ){
-            $accountability_days_since = round( ( time() - $accountability_ts ) / 86400 /* Days in secs! */ );
-        }
+            ] )['posts'][0]['accountability']['timestamp'] ?? 0;
+            if ( $accountability_ts > 0 ){
+                $accountability_days_since = round( ( time() - $accountability_ts ) / 86400 /* Days in secs! */ );
+            }
 
-        // Revert to original user.
-        if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
-            wp_set_current_user( $original_user->ID );
-        }
+            // Revert to original user.
+            if ( ! empty( $original_user ) && isset( $original_user->ID ) ) {
+                wp_set_current_user( $original_user->ID );
+            }
 
-        // Capture miscellaneous stats.
-        $statistics['misc'] = [
-            'active_groups' => $active_groups_latest_total,
-            'accountability_days_since' => ( $accountability_days_since >= 0 ) ? $accountability_days_since : '-'
-        ];
+            // Capture miscellaneous stats.
+            $statistics['misc'] = [
+                'active_groups' => $active_groups_latest_total,
+                'accountability_days_since' => ( $accountability_days_since >= 0 ) ? $accountability_days_since : '-'
+            ];
+        }
 
         return $statistics;
     }
