@@ -1071,6 +1071,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
              */
 
             jQuery('#content_submit_but').on("click", function () {
+                let spinner = jQuery('.update-loading-spinner');
                 let id = jQuery('#post_id').val();
                 let state = jQuery('#post_state').val();
 
@@ -1237,6 +1238,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             jQuery('#content_submit_but').prop('disabled', false);
                         }
                     } else {
+                        spinner.addClass('active');
 
                         // Submit data for post update
                         jQuery.ajax({
@@ -1365,6 +1367,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 </div>
 
                 <!-- SUBMIT UPDATES -->
+                <span class="update-loading-spinner loading-spinner"></span>
                 <button id="content_submit_but" style="display: none; min-width: 100%;" class="button select-button">
                     <?php esc_html_e( 'Submit Update', 'disciple-tools-survey-collection' ) ?>
                 </button>
