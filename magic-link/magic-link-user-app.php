@@ -1367,9 +1367,9 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 </div>
 
                 <!-- SUBMIT UPDATES -->
-                <span class="update-loading-spinner loading-spinner"></span>
                 <button id="content_submit_but" style="display: none; min-width: 100%;" class="button select-button">
                     <?php esc_html_e( 'Submit Update', 'disciple-tools-survey-collection' ) ?>
+                    <span class="update-loading-spinner loading-spinner" style="height: 17px; width: 17px; vertical-align: text-bottom;"></span>
                 </button>
 
                 <!-- FIELD HELP MODAL -->
