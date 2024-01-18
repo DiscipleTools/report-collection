@@ -5,7 +5,7 @@
  * Description: Disciple.Tools - Survey Collection is intended to help with the collection and presentation of regular activity statistics.
  * Text Domain: disciple-tools-survey-collection
  * Domain Path: /languages
- * Version:  1.2.2
+ * Version:  1.2.3
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-survey-collection
  * Requires at least: 4.7.0
