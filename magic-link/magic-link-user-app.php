@@ -1107,7 +1107,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                             case 'number':
                             case 'textarea':
                             case 'text':
-                            case 'key_select': {
+                            case 'key_select':
+                            case 'boolean': {
 
                                 payload['fields'].push({
                                     id: field_id,
@@ -1152,21 +1153,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                                     id: field_id,
                                     type: field_type,
                                     value: options
-                                });
-
-                                break;
-                            }
-
-                            case 'boolean': {
-
-                                let initial_val = JSON.parse(jQuery(tr).find('#field_initial_state_' + field_id).val());
-                                let current_val = jQuery(tr).find(selector).prop('checked');
-
-                                payload['fields'].push({
-                                    id: field_id,
-                                    type: field_type,
-                                    value: current_val,
-                                    changed: (initial_val !== current_val)
                                 });
 
                                 break;
@@ -1645,6 +1631,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                 case 'text':
                 case 'key_select':
                 case 'date':
+                case 'boolean':
                     $updates[ $field['id'] ] = $field['value'];
 
                     // Ensure post name is also set to submission date.
@@ -1655,14 +1642,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
                         if ( empty( $field['value'] ) ){
                             $updates[$field['id']] = time();
                         }
-                    }
-                    break;
-
-                case 'boolean':
-
-                    // Only update if there has been a state change!
-                    if ( $field['changed'] ) {
-                        $updates[ $field['id'] ] = $field['value'] === 'true';
                     }
                     break;
 
