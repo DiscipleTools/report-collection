@@ -59,6 +59,11 @@ function disciple_tools_survey_collection() {
 
 add_action( 'disciple_tools_load_plugins', 'disciple_tools_survey_collection', 20 );
 
+add_action( 'disciple_tools_loaded', function () {
+    require_once( 'magic-link/magic-link-user-app.php' );
+} );
+
+
 //register the D.T Plugin
 add_filter( 'dt_plugins', function ( $plugins ){
     $plugin_data = get_file_data( __FILE__, [ 'Version' => 'Version', 'Plugin Name' => 'Plugin Name' ], false );
@@ -113,11 +118,6 @@ class Disciple_Tools_Survey_Collection {
 //        if ( 'settings' === dt_get_url_path() && ! $is_rest ) {
 //            require_once( 'tile/settings-tile.php' ); // add custom settings page tile
 //        }
-
-        /**
-         * Create a magic link
-         */
-        require_once( 'magic-link/magic-link-user-app.php' );
 
         /**
          * Add a custom admin page in the admin area
