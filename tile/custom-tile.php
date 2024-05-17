@@ -23,7 +23,7 @@ class Disciple_Tools_Survey_Collection_Tile {
     /**
      * This function registers a new tile to a specific post type
      *
-     * @param $tiles
+     * @param array $tiles
      * @param string $post_type
      *
      * @return mixed

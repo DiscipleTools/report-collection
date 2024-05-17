@@ -33,10 +33,10 @@ class Disciple_Tools_Survey_Collection_Settings_Tile
     /**
      * Adds menu item
      *
-     * @param $dt_user WP_User object
-     * @param $dt_user_meta array Full array of user meta data
-     * @param $dt_user_contact_id bool/int returns either id for contact connected to user or false
-     * @param $contact_fields array Array of fields on the contact record
+     * @param WP_User $dt_user object
+     * @param array $dt_user_meta Full array of user meta data
+     * @param bool/int $dt_user_contact_id returns either id for contact connected to user or false
+     * @param array $contact_fields Array of fields on the contact record
      */
     public function dt_profile_settings_page_menu( $dt_user, $dt_user_meta, $dt_user_contact_id, $contact_fields ) {
         ?>
@@ -47,10 +47,10 @@ class Disciple_Tools_Survey_Collection_Settings_Tile
     /**
      * Adds custom tile
      *
-     * @param $dt_user WP_User object
-     * @param $dt_user_meta array Full array of user meta data
-     * @param $dt_user_contact_id bool/int returns either id for contact connected to user or false
-     * @param $contact_fields array Array of fields on the contact record
+     * @param WP_User $dt_user object
+     * @param array $dt_user_meta Full array of user meta data
+     * @param bool/int $dt_user_contact_id returns either id for contact connected to user or false
+     * @param array $contact_fields Array of fields on the contact record
      */
     public function dt_profile_settings_page_sections( $dt_user, $dt_user_meta, $dt_user_contact_id, $contact_fields ) {
         ?>
