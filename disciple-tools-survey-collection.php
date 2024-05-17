@@ -56,7 +56,7 @@ function disciple_tools_survey_collection() {
     return Disciple_Tools_Survey_Collection::instance();
 
 }
-add_action( 'after_setup_theme', 'disciple_tools_survey_collection', 20 );
+add_action( 'disciple_tools_loaded', 'disciple_tools_survey_collection', 20 );
 
 //register the D.T Plugin
 add_filter( 'dt_plugins', function ( $plugins ){
