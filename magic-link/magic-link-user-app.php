@@ -36,6 +36,35 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             return;
         }
 
+        add_action( 'disciple_tools_loaded', [ $this, 'disciple_tools_loaded' ] );
+
+        $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
+        parent::__construct();
+
+        /**
+         * tests if other URL
+         */
+        $url = dt_get_url_path();
+        if ( strpos( $url, $this->root . '/' . $this->type ) === false ) {
+            return;
+        }
+        /**
+         * tests magic link parts are registered and have valid elements
+         */
+        if ( !$this->check_parts_match() ){
+            return;
+        }
+
+        // load if valid url
+        add_action( 'dt_blank_body', [ $this, 'body' ] );
+        add_filter( 'dt_magic_url_base_allowed_css', [ $this, 'dt_magic_url_base_allowed_css' ], 10, 1 );
+        add_filter( 'dt_magic_url_base_allowed_js', [ $this, 'dt_magic_url_base_allowed_js' ], 10, 1 );
+        add_action( 'wp_enqueue_scripts', [ $this, 'wp_enqueue_scripts' ], 100 );
+
+    }
+
+    public function disciple_tools_loaded(): void {
+
         /**
          * Specify metadata structure, specific to the processing of current
          * magic link type.
@@ -60,35 +89,11 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             ]
         ];
 
-        $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
-        parent::__construct();
-
         /**
          * user_app and module section
          */
         add_filter( 'dt_settings_apps_list', [ $this, 'dt_settings_apps_list' ], 10, 1 );
         add_action( 'rest_api_init', [ $this, 'add_endpoints' ] );
-
-        /**
-         * tests if other URL
-         */
-        $url = dt_get_url_path();
-        if ( strpos( $url, $this->root . '/' . $this->type ) === false ) {
-            return;
-        }
-        /**
-         * tests magic link parts are registered and have valid elements
-         */
-        if ( !$this->check_parts_match() ){
-            return;
-        }
-
-        // load if valid url
-        add_action( 'dt_blank_body', [ $this, 'body' ] );
-        add_filter( 'dt_magic_url_base_allowed_css', [ $this, 'dt_magic_url_base_allowed_css' ], 10, 1 );
-        add_filter( 'dt_magic_url_base_allowed_js', [ $this, 'dt_magic_url_base_allowed_js' ], 10, 1 );
-        add_action( 'wp_enqueue_scripts', [ $this, 'wp_enqueue_scripts' ], 100 );
-
     }
 
     private function get_supported_field_tiles(): array {
