@@ -38,6 +38,30 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
 
         add_action( 'disciple_tools_loaded', [ $this, 'disciple_tools_loaded' ] );
 
+        /**
+         * Specify metadata structure, specific to the processing of current
+         * magic link type.
+         *
+         * - meta:              Magic link plugin related data.
+         *      - app_type:     Flag indicating type to be processed by magic link plugin.
+         *      - post_type     Magic link type post type.
+         *      - contacts_only:    Boolean flag indicating how magic link type user assignments are to be handled within magic link plugin.
+         *                          If True, lookup field to be provided within plugin for contacts only searching.
+         *                          If false, Dropdown option to be provided for user, team or group selection.
+         *      - fields:       List of fields to be displayed within magic link frontend form.
+         */
+        $this->meta = [
+            'app_type'       => 'magic_link',
+            'post_type'      => $this->post_type,
+            'contacts_only'  => false,
+            'fields'         => [],
+            'fields_refresh' => [
+                'enabled'    => true,
+                'post_type'  => 'reports',
+                'ignore_ids' => []
+            ]
+        ];
+
         $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
         parent::__construct();
 
@@ -77,17 +101,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
          *                          If false, Dropdown option to be provided for user, team or group selection.
          *      - fields:       List of fields to be displayed within magic link frontend form.
          */
-        $this->meta = [
-            'app_type'       => 'magic_link',
-            'post_type'      => $this->post_type,
-            'contacts_only'  => false,
-            'fields'         => self::build_meta_report_survey_collection_fields(),
-            'fields_refresh' => [
-                'enabled'    => true,
-                'post_type'  => 'reports',
-                'ignore_ids' => []
-            ]
-        ];
+        $this->meta['fields'] = self::build_meta_report_survey_collection_fields();
 
         /**
          * user_app and module section
