@@ -66,6 +66,12 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         parent::__construct();
 
         /**
+         * user_app and module section
+         */
+        add_filter( 'dt_settings_apps_list', [ $this, 'dt_settings_apps_list' ], 10, 1 );
+        add_action( 'rest_api_init', [ $this, 'add_endpoints' ] );
+
+        /**
          * tests if other URL
          */
         $url = dt_get_url_path();
@@ -102,12 +108,6 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
          *      - fields:       List of fields to be displayed within magic link frontend form.
          */
         $this->meta['fields'] = self::build_meta_report_survey_collection_fields();
-
-        /**
-         * user_app and module section
-         */
-        add_filter( 'dt_settings_apps_list', [ $this, 'dt_settings_apps_list' ], 10, 1 );
-        add_action( 'rest_api_init', [ $this, 'add_endpoints' ] );
     }
 
     private function get_supported_field_tiles(): array {
