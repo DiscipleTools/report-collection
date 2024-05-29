@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return object|bool
  */
 function disciple_tools_survey_collection() {
-    $disciple_tools_survey_collection_required_dt_theme_version = '1.19';
+    $disciple_tools_survey_collection_required_dt_theme_version = '1.63';
     $wp_theme = wp_get_theme();
     $version = $wp_theme->version;
 
