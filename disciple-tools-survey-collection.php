@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return object|bool
  */
 function disciple_tools_survey_collection() {
-    $disciple_tools_survey_collection_required_dt_theme_version = '1.19';
+    $disciple_tools_survey_collection_required_dt_theme_version = '1.63';
     $wp_theme = wp_get_theme();
     $version = $wp_theme->version;
 
@@ -56,7 +56,8 @@ function disciple_tools_survey_collection() {
     return Disciple_Tools_Survey_Collection::instance();
 
 }
-add_action( 'after_setup_theme', 'disciple_tools_survey_collection', 20 );
+
+add_action( 'disciple_tools_load_plugins', 'disciple_tools_survey_collection', 20 );
 
 //register the D.T Plugin
 add_filter( 'dt_plugins', function ( $plugins ){

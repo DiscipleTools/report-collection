@@ -36,6 +36,8 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             return;
         }
 
+        add_action( 'disciple_tools_loaded', [ $this, 'disciple_tools_loaded' ] );
+
         /**
          * Specify metadata structure, specific to the processing of current
          * magic link type.
@@ -52,7 +54,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
             'app_type'       => 'magic_link',
             'post_type'      => $this->post_type,
             'contacts_only'  => false,
-            'fields'         => self::build_meta_report_survey_collection_fields(),
+            'fields'         => [],
             'fields_refresh' => [
                 'enabled'    => true,
                 'post_type'  => 'reports',
@@ -89,6 +91,23 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
         add_filter( 'dt_magic_url_base_allowed_js', [ $this, 'dt_magic_url_base_allowed_js' ], 10, 1 );
         add_action( 'wp_enqueue_scripts', [ $this, 'wp_enqueue_scripts' ], 100 );
 
+    }
+
+    public function disciple_tools_loaded(): void {
+
+        /**
+         * Specify metadata structure, specific to the processing of current
+         * magic link type.
+         *
+         * - meta:              Magic link plugin related data.
+         *      - app_type:     Flag indicating type to be processed by magic link plugin.
+         *      - post_type     Magic link type post type.
+         *      - contacts_only:    Boolean flag indicating how magic link type user assignments are to be handled within magic link plugin.
+         *                          If True, lookup field to be provided within plugin for contacts only searching.
+         *                          If false, Dropdown option to be provided for user, team or group selection.
+         *      - fields:       List of fields to be displayed within magic link frontend form.
+         */
+        $this->meta['fields'] = self::build_meta_report_survey_collection_fields();
     }
 
     private function get_supported_field_tiles(): array {
@@ -183,7 +202,7 @@ class Disciple_Tools_Survey_Collection_Magic_User_App extends DT_Magic_Url_Base 
      * - description:       Magic link type description.
      * - settings_display:  Boolean flag which determines if magic link type is to be listed within frontend user profile settings.
      *
-     * @param $apps_list
+     * @param array $apps_list
      *
      * @return mixed
      */
